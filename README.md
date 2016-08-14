@@ -1,3 +1,3 @@
 # Sentimize
 
-Sentimize your day with your music in mood-based playlists.
+Play music by mood
