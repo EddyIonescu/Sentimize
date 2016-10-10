@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import me.sentimize.sentimize.Fragments.SongFragment;
+import me.sentimize.sentimize.Models.Song;
 
 /**
  * Helper class for providing sample content for user interfaces created by
@@ -24,46 +25,23 @@ public class SongContent {
 
     public static void addItem(Song item) {
         ITEMS.add(item);
-        ITEM_MAP.put(item.Id, item);
+        ITEM_MAP.put(item.id, item);
         SongFragment.UpdateList();
     }
 
     public static void addItems(ArrayList<Song> items){
         for(Song s : items){
             ITEMS.add(s);
-            ITEM_MAP.put(s.Id, s);
+            ITEM_MAP.put(s.id, s);
         }
         SongFragment.UpdateList();
     }
 
-    // Represents Type of content in list
-    public static class Song {
-        public String Id;
-        public String Name;
-        public String Artist;
-        public double Happiness;
-        public boolean IsLocal;
-        public boolean IsSpotify;
-        public String StorageStatus;
-        public boolean IsAnalyzed;
-        public ArrayList<Integer> IsInPlaylists;
-
-        public Song(){
-
-        }
-        //local song
-        public Song(long localId, String name, String artist) {
-            Id = Long.toString(localId);
-            Name = name;
-            Artist = artist;
-            IsLocal = true;
-            IsSpotify = false;
-            StorageStatus = "Local";
-        }
-
-        @Override
-        public String toString() {
-            return Name;
-        }
+    public static void setItems(ArrayList<Song> items){
+        ITEMS.clear();
+        ITEM_MAP.clear();
+        addItems(items);
     }
+
+
 }

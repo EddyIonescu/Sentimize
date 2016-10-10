@@ -11,9 +11,8 @@ import android.os.IBinder;
 import android.os.PowerManager;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
-import me.sentimize.sentimize.Fragments.Song.SongContent;
+import me.sentimize.sentimize.Models.Song;
 
 /**
  * Created by eddy on 16-07-13.
@@ -67,12 +66,12 @@ public class PlayMusicService extends Service implements
     public void playSong(){
         player.prepareAsync();
     }
-    public void playSong(SongContent.Song playSong) throws IOException {
+    public void playSong(Song playSong) throws IOException {
         //play a song
         player.reset();
         //get id
-        if(playSong.IsLocal) {
-            long currSong = Long.parseLong(playSong.Id);
+        if(playSong.isLocal) {
+            long currSong = Long.parseLong(playSong.id);
             //set uri
             Uri trackUri = ContentUris.withAppendedId(
                     android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,

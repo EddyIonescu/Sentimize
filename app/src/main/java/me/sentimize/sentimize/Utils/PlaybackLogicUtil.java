@@ -7,9 +7,8 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
-import me.sentimize.sentimize.Fragments.Song.SongContent;
+import me.sentimize.sentimize.Models.Song;
 import me.sentimize.sentimize.Services.PlayMusicService;
 
 /**
@@ -22,8 +21,6 @@ public class PlaybackLogicUtil {
     private static Intent playIntent;
     private static boolean musicBound=false;
 
-    //private static ArrayList<SongContent.Song> songList = new ArrayList<SongContent.Song>();
-
     public PlaybackLogicUtil(Context context) {
         if(playIntent==null){
             //connect to the service
@@ -35,6 +32,8 @@ public class PlaybackLogicUtil {
                     //get service
                     musicSrv = binder.getService();
                     musicBound = true;
+
+                    //fixme not being called
                     System.out.println("Playback works");
                 }
 
@@ -55,7 +54,7 @@ public class PlaybackLogicUtil {
             musicSrv.playSong();
         }
     }
-    public void playSong(SongContent.Song song) throws IOException {
+    public void playSong(Song song) throws IOException {
         if(musicBound) {
             musicSrv.playSong(song);
         }
