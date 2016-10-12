@@ -67,7 +67,7 @@ public class PlayMusicService extends Service implements
 
     // playing music logic
     public void playLocalSong(){
-        if(!player.isPlaying()){
+        if(!player.isPlaying()) {
             player.start();
         }
     }
@@ -112,6 +112,10 @@ public class PlayMusicService extends Service implements
 
     public boolean isPlaying(){
         return player.isPlaying();
+    }
+
+    public void setProgress(int i){
+        player.seekTo(i);
     }
 
     @Override

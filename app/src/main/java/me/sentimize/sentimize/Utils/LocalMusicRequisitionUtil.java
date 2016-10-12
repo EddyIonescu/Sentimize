@@ -40,7 +40,7 @@ public class LocalMusicRequisitionUtil {
                     String thisPath = musicCursor.getString(pathColumn);
                     System.out.println(thisTitle + " - " + thisDuration);
                     if(!tooShort(thisDuration)) {
-                        LocalSong song = new LocalSong(thisId, thisTitle, thisArtist, thisPath);
+                        LocalSong song = new LocalSong(thisId, thisTitle, thisArtist, thisPath, thisDuration);
                         song = enhanceSongName(song);
                         songList.add(song);
                     }
@@ -57,6 +57,13 @@ public class LocalMusicRequisitionUtil {
             if (s.length == 2) {
                 song.name = s[0];
                 song.artist = s[1];
+            }
+        }
+        else if(song.name.contains(" - ")){
+            String[] s = song.name.split(" - ");
+            if(s.length == 2){
+                song.artist = s[0];
+                song.name = s[1];
             }
         }
         return song;

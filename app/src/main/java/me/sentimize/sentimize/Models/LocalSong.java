@@ -12,8 +12,8 @@ public class LocalSong extends Song {
     private String id;
     private String path;
     //local song
-    public LocalSong(long localId, String name, String artist, String path) {
-        super(name, artist);
+    public LocalSong(long localId, String name, String artist, String path, int duration) {
+        super(name, artist, duration);
         id = Long.toString(localId);
         this.path = path;
     }

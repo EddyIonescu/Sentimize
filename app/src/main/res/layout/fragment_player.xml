@@ -6,18 +6,22 @@
     android:id="@+id/fragment_player"
     tools:context="me.sentimize.sentimize.Fragments.PlayerFragment">
 
-    <android.support.v7.widget.AppCompatSeekBar
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/seek_bar"/>
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:background="@color/colorAccent">
+        <SeekBar
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/seekbar_height"
+            android:progressTint="@android:color/white"
+            android:progressBackgroundTint="@android:color/white"
+            android:id="@+id/seek_bar" />
         <LinearLayout
             android:layout_width="match_parent"
             android:gravity="center_horizontal"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
         <android.support.v7.widget.AppCompatImageButton
             android:src="@drawable/ic_skip_previous_white_48dp"
             android:id="@+id/prev_btn"
@@ -26,12 +30,13 @@
            android:src="@drawable/ic_play_circle_filled_white_48dp"
             android:id="@+id/play_btn"
             style="@style/Player_Button"
+            android:visibility="gone"
             />
         <android.support.v7.widget.AppCompatImageButton
             android:src="@drawable/ic_pause_circle_filled_white_48dp"
             android:id="@+id/pause_btn"
             style="@style/Player_Button"
-            android:visibility="gone"
+            android:visibility="visible"
             />
         <android.support.v7.widget.AppCompatImageButton
             android:src="@drawable/ic_skip_next_white_48dp"
@@ -39,6 +44,6 @@
             style="@style/Player_Button"
             />
         </LinearLayout>
-    </RelativeLayout>
+    </LinearLayout>
 
     </FrameLayout>

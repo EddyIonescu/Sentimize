@@ -70,4 +70,9 @@ public class PlaybackLogicUtil {
     public boolean isPlaying(){
         return musicbound && musicSrv.isPlaying();
     }
+
+    public void setProgress(int i){
+        if(musicbound) musicSrv.setProgress(i);
+    }
+
 }

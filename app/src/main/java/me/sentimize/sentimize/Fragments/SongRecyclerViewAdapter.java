@@ -39,7 +39,7 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerVi
         holder.mItem = mValues.get(position);
         holder.mNameView.setText(mValues.get(position).name);
         holder.mArtistView.setText(mValues.get(position).artist);
-        holder.mStorageStatusView.setText(mValues.get(position).storageStatus);
+        holder.mStorageStatusView.setText(mValues.get(position).getStorageStatus());
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override

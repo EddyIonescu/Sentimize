@@ -7,13 +7,14 @@ package me.sentimize.sentimize.Models;
 public class Song {
     public String name;
     public String artist;
-    public String storageStatus;
+    private String storageStatus;
+    private int duration;
 
     public Song(){
 
     }
 
-    public Song(String name, String artist) {
+    public Song(String name, String artist, int duration) {
         this.name = name;
         this.artist = artist;
         storageStatus = "Local";
@@ -22,5 +23,13 @@ public class Song {
     @Override
     public String toString() {
         return name;
+    }
+
+    public int getDuration(){
+        return duration;
+    }
+
+    public String getStorageStatus(){
+        return storageStatus;
     }
 }

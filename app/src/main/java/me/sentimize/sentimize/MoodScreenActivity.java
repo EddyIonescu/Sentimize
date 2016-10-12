@@ -33,6 +33,7 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
     private static PlaybackLogicUtil playbackLogicUtil;
 
     private Handler mHandler = new Handler();
+    private boolean isPaused = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,14 +56,13 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
         playbackLogicUtil = new PlaybackLogicUtil(this);
 
 
-//Make sure you update Seekbar on UI thread
         MoodScreenActivity.this.runOnUiThread(new Runnable() {
-
             @Override
             public void run() {
-                seekBar.setProgress(playbackLogicUtil.getProgress());
-                seekBar.setMax(playbackLogicUtil.getDuration());
-                mHandler.postDelayed(this, 100);
+                if(!isPaused) {
+                    seekBar.setProgress(Math.min(seekBar.getProgress() + 1000, seekBar.getMax()));
+                }
+                mHandler.postDelayed(this, 1000);
             }
         });
     }
@@ -92,6 +92,7 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
     private AppCompatImageButton play_btn, pause_btn, prev_btn, skip_btn;
     private Animation fab_low, fab_med, fab_high;
     private SeekBar seekBar;
+    private int uplifting, energetic, emotional = 1;
 
     public void initFabs(){
 
@@ -120,6 +121,8 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
 
         seekBar = (SeekBar) findViewById(R.id.seek_bar);
         seekBar.setOnSeekBarChangeListener(this);
+        seekBar.setMax(1);
+        seekBar.setProgress(0);
     }
 
     public void animateFAB(int fabID){
@@ -135,7 +138,14 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
 
             if (v.getId() == R.id.fab_uplifting) {
                 animateFAB(v.getId());
-            } else if (v.getId() == R.id.play_btn) {
+            }
+            else if(v.getId() == R.id.fab_energy) {
+
+            }
+            else if(v.getId() == R.id.fab_emotion){
+
+            }
+            else if (v.getId() == R.id.play_btn) {
                 songPlaying(true);
             } else if (v.getId() == R.id.pause_btn) {
                 songPlaying(false);
@@ -160,10 +170,13 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
 
     public void onListFragmentInteraction(Song song) {
         // Do different stuff
-        System.out.println("List Clicked-  - " + song.name);
+        System.out.println("List Clicked-  - " + song.toString());
         if(song instanceof LocalSong) {
             System.out.println("Getting BPM");
             LocalMusicAnalysis.getBPM((LocalSong)song, this);
+
+            seekBar.setProgress(0);
+            seekBar.setMax(song.getDuration());
             playbackLogicUtil.playSong((LocalSong)song);
 
         }
@@ -171,6 +184,7 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
 
     public void songPlaying(boolean isPlaying){
         if(isPlaying){
+            isPaused = false;
             System.out.println("Pressed Play");
             // play song already selected
             playbackLogicUtil.playSong();
@@ -182,14 +196,16 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
             playbackLogicUtil.pauseSong();
             play_btn.setVisibility(View.VISIBLE);
             pause_btn.setVisibility(View.GONE);
+            isPaused = true;
         }
-
     }
 
     // Implement Seekbar Methods
     @Override
     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-
+        if(playbackLogicUtil != null) {
+            playbackLogicUtil.setProgress(i);
+        }
     }
 
     @Override
