@@ -8,6 +8,7 @@ import android.provider.MediaStore;
 
 import java.util.ArrayList;
 
+import me.sentimize.sentimize.Models.LocalSong;
 import me.sentimize.sentimize.Models.Song;
 
 /**
@@ -24,14 +25,11 @@ public class LocalMusicRequisitionUtil {
             Cursor musicCursor = musicResolver.query(musicUri, null, null, null, null);
             //http://code.tutsplus.com/tutorials/create-a-music-player-on-android-project-setup--mobile-22764
             if (musicCursor != null && musicCursor.moveToFirst()) {
-                int titleColumn = musicCursor.getColumnIndex
-                        (android.provider.MediaStore.Audio.Media.TITLE);
-                int idColumn = musicCursor.getColumnIndex
-                        (android.provider.MediaStore.Audio.Media._ID);
-                int artistColumn = musicCursor.getColumnIndex
-                        (android.provider.MediaStore.Audio.Media.ARTIST);
-                int durationColumn = musicCursor.getColumnIndex
-                        (MediaStore.Audio.Media.DURATION);
+                int titleColumn = musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.TITLE);
+                int idColumn = musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media._ID);
+                int artistColumn = musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.ARTIST);
+                int durationColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.DURATION);
+                int pathColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.DATA);
 
                 do {
                     //we need the thisID so that Android gets us the song we want to play
@@ -39,9 +37,10 @@ public class LocalMusicRequisitionUtil {
                     String thisTitle = musicCursor.getString(titleColumn);
                     String thisArtist = musicCursor.getString(artistColumn);
                     int thisDuration = musicCursor.getInt(durationColumn);
+                    String thisPath = musicCursor.getString(pathColumn);
                     System.out.println(thisTitle + " - " + thisDuration);
                     if(!tooShort(thisDuration)) {
-                        Song song = new Song(thisId, thisTitle, thisArtist);
+                        LocalSong song = new LocalSong(thisId, thisTitle, thisArtist, thisPath);
                         song = enhanceSongName(song);
                         songList.add(song);
                     }
@@ -52,7 +51,7 @@ public class LocalMusicRequisitionUtil {
         }
         return songList;
     }
-    public static Song enhanceSongName(Song song){
+    public static LocalSong enhanceSongName(LocalSong song){
         if (song.name.contains(" by ")) {
             String[] s = song.name.split(" by ");
             if (s.length == 2) {

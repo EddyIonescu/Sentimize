@@ -31,28 +31,34 @@ model {
 
         defaultConfig {
             applicationId "me.sentimize.sentimize"
-            minSdkVersion.apiLevel = 16 // more than 95% of all active Android devices
-            targetSdkVersion.apiLevel = 22
+            minSdkVersion.apiLevel = 21 // more than 95% of all active Android devices
+            targetSdkVersion.apiLevel = 23
             versionCode 1
             versionName "1.0"
         }
+
+        ndk { // your application's native layer parameters
+            moduleName = "app"
+            platformVersion = 21
+
+            stl = "c++_static"
+            CFlags.addAll(["-O3", "-fsigned-char"]) // full optimization, char data type is signed
+
+            cppFlags.addAll(["-fsigned-char", "-I${superpowered_sdk_path}".toString()])
+            //cppFlags.addAll("-I${file("src/main/jni/")}".toString())
+
+            ldLibs.addAll(["log", "android", "OpenSLES"])
+            // load these libraries: log, android, OpenSL ES (for audio)
+            abiFilters.addAll(["armeabi-v7a", "arm64-v8a", "x86", "x86_64"])
+            // these platforms cover 99% percent of all Android devices
+        }
     }
 
-    android.ndk { // your application's native layer parameters
-        moduleName = "app"
-        platformVersion = 21
-        stl = "c++_static"
-        CFlags.addAll(["-O3", "-fsigned-char"]) // full optimization, char data type is signed
-        cppFlags.addAll(["-fsigned-char", "-I${superpowered_sdk_path}".toString()])
-        ldLibs.addAll(["log", "android", "OpenSLES"])
-        // load these libraries: log, android, OpenSL ES (for audio)
-        abiFilters.addAll(["armeabi-v7a", "arm64-v8a", "x86", "x86_64"])
-        // these platforms cover 99% percent of all Android devices
-    }
+
 
     android.sources.main.jni {
         source {
-            srcDir "jni"
+            srcDir "main/jni"
             srcDir "${superpowered_sdk_path}/AndroidIO"
         }
         dependencies {

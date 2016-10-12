@@ -35,19 +35,12 @@ public class SongFragment extends Fragment {
     private OnListFragmentInteractionListener mListener;
     private static RecyclerView.Adapter mAdapter;
 
-    private Method AnimateFAB;
-
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
     public SongFragment(){
 
-    }
-    @SuppressLint("ValidFragment")
-    public SongFragment(Method animateFAB) {
-        // pass on AnimateFAB method via reflection to use it
-        AnimateFAB = animateFAB;
     }
 
     public static void UpdateList(){

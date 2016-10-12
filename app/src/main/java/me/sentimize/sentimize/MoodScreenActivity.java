@@ -12,19 +12,22 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 
 import java.io.IOException;
 
 import me.sentimize.sentimize.Fragments.Song.SongContent;
 import me.sentimize.sentimize.Fragments.SongFragment;
+import me.sentimize.sentimize.Models.LocalSong;
 import me.sentimize.sentimize.Models.Song;
+import me.sentimize.sentimize.Utils.LocalMusicAnalysis;
 import me.sentimize.sentimize.Utils.LocalMusicRequisitionUtil;
 import me.sentimize.sentimize.Utils.PermissionUtils;
 import me.sentimize.sentimize.Utils.PlaybackLogicUtil;
 
 public class MoodScreenActivity extends AppCompatActivity implements View.OnClickListener, SongFragment.OnListFragmentInteractionListener {
 
-    public PlaybackLogicUtil playbackLogicUtil;
+    private static PlaybackLogicUtil playbackLogicUtil;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,32 +39,12 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
         initFabs();
 
 
-        // Check that the activity is using the layout version with
-        // the fragment_container FrameLayout
         if (findViewById(R.id.list_container) != null) {
-
-            // However, if we're being restored from a previous state,
-            // then we don't need to do anything and should return or else
-            // we could end up with overlapping fragments.
             if (savedInstanceState != null) {
                 return;
             }
-
-            // Create a new Fragment to be placed in the activity layout
-            try {
-                // Passing on animateFAB as it can't be made static, so the function pointer is being passed via reflection
-                SongFragment firstFragment = new SongFragment(this.getClass().getMethod("animateFAB"));
-
-                // In case this activity was started with special instructions from an
-                // Intent, pass the Intent's extras to the fragment as arguments
-                firstFragment.setArguments(getIntent().getExtras());
-
-                // Add the fragment to the 'fragment_container' FrameLayout
-                getSupportFragmentManager().beginTransaction()
-                        .add(R.id.list_container, firstFragment).commit();
-            } catch (NoSuchMethodException e) {
-
-            }
+            SongFragment firstFragment = new SongFragment();
+            getSupportFragmentManager().beginTransaction().add(R.id.list_container, firstFragment).commit();
         }
 
         playbackLogicUtil = new PlaybackLogicUtil(this);
@@ -89,6 +72,7 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
     }
 
     private FloatingActionButton fab_uplifting, fab_energetic, fab_emotional;
+    private Button play_btn, pause_btn, prev_btn, skip_btn;
     private Animation fab_low, fab_med, fab_high;
 
     public void initFabs(){
@@ -105,6 +89,16 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
         fab_uplifting.setOnClickListener(this);
         fab_energetic.setOnClickListener(this);
         fab_emotional.setOnClickListener(this);
+
+        play_btn = (Button) findViewById(R.id.play_btn);
+        pause_btn = (Button) findViewById(R.id.pause_btn);
+        prev_btn = (Button) findViewById(R.id.prev_btn);
+        skip_btn= (Button) findViewById(R.id.next_btn);
+
+        play_btn.setOnClickListener(this);
+        pause_btn.setOnClickListener(this);
+        prev_btn.setOnClickListener(this);
+        skip_btn.setOnClickListener(this);
     }
 
     public void animateFAB(int fabID){
@@ -116,16 +110,14 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
         // without local music access we can't do anything
         if(PermissionUtils.canAccessLocalMusic(this, v)) {
 
-            SongContent.addItems(LocalMusicRequisitionUtil.getSongList(this));
+            SongContent.setItems(LocalMusicRequisitionUtil.getSongList(this));
+
             if (v.getId() == R.id.fab_uplifting) {
                 animateFAB(v.getId());
-            } else if (v.getId() == R.id.fab_play) {
-                System.out.println("Pressed Play");
-                // play selected song
-                playbackLogicUtil.playSong();
+            } else if (v.getId() == R.id.play_btn) {
+                songPlaying(true);
             } else if (v.getId() == R.id.fab_pause) {
-                System.out.println("Pressed Pause");
-                playbackLogicUtil.pauseSong();
+                songPlaying(false);
             } else {
                 System.out.println("Plus/close button was NOT tapped - " + this.getResources().getResourceName(v.getId()));
             }
@@ -148,11 +140,27 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
     public void onListFragmentInteraction(Song song) {
         // Do different stuff
         System.out.println("List Clicked-  - " + song.name);
-        try {
-            playbackLogicUtil.playSong(song);
-        } catch (IOException e) {
-            // error playing song
-            System.out.println(e.getMessage());
+        if(song instanceof LocalSong) {
+            System.out.println("Getting BPM");
+            LocalMusicAnalysis.getBPM((LocalSong)song, this);
+            playbackLogicUtil.playSong((LocalSong)song);
+
+        }
+    }
+
+    public void songPlaying(boolean isPlaying){
+        if(isPlaying){
+            System.out.println("Pressed Play");
+            // play song already selected
+            playbackLogicUtil.playSong();
+            play_btn.setVisibility(View.VISIBLE);
+            pause_btn.setVisibility(View.GONE);
+        }
+        else{
+            System.out.println("Pressed Pause");
+            playbackLogicUtil.pauseSong();
+            play_btn.setVisibility(View.GONE);
+            pause_btn.setVisibility(View.VISIBLE);
         }
     }
 

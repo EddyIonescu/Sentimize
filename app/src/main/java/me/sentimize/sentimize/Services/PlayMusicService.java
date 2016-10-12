@@ -12,6 +12,7 @@ import android.os.PowerManager;
 
 import java.io.IOException;
 
+import me.sentimize.sentimize.Models.LocalSong;
 import me.sentimize.sentimize.Models.Song;
 
 /**
@@ -37,8 +38,7 @@ public class PlayMusicService extends Service implements
 
     public void initMusicPlayer(){
         //set player properties
-        player.setWakeMode(getApplicationContext(),
-                PowerManager.PARTIAL_WAKE_LOCK);
+        player.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
         player.setAudioStreamType(AudioManager.STREAM_MUSIC);
         player.setOnPreparedListener(this);
         player.setOnCompletionListener(this);
@@ -63,22 +63,22 @@ public class PlayMusicService extends Service implements
 
 
     // playing music logic
-    public void playSong(){
+    public void playLocalSong(){
         player.prepareAsync();
     }
-    public void playSong(Song playSong) throws IOException {
+    public void playLocalSong(LocalSong playSong)  {
         //play a song
         player.reset();
-        //get id
-        if(playSong.isLocal) {
-            long currSong = Long.parseLong(playSong.id);
-            //set uri
-            Uri trackUri = ContentUris.withAppendedId(
-                    android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    currSong);
+        Uri trackUri = playSong.getTrack();
+        System.out.println("Playing track: " + trackUri);
+        try {
             player.setDataSource(getApplicationContext(), trackUri);
-            player.prepareAsync();
         }
+        catch (IOException e){
+            System.out.println("Error playing song");
+            System.out.println(e.getMessage());
+        }
+        player.prepareAsync();
     }
     public void pauseSong(){
         player.pause();

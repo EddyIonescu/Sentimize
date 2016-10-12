@@ -1,8 +1,8 @@
 #include <jni.h>
 #include <stdlib.h>
-#include <SuperpoweredFrequencyDomain.h>
-#include <AndroidIO/SuperpoweredAndroidAudioIO.h>
-#include <SuperpoweredSimple.h>
+#include <../../../../../../Superpowered/SuperpoweredFrequencyDomain.h>
+#include <../../../../../../Superpowered/AndroidIO/SuperpoweredAndroidAudioIO.h>
+#include <../../../../../../Superpowered/SuperpoweredSimple.h>
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_AndroidConfiguration.h>
 

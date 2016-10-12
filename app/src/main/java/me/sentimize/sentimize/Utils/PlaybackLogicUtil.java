@@ -8,6 +8,7 @@ import android.os.IBinder;
 
 import java.io.IOException;
 
+import me.sentimize.sentimize.Models.LocalSong;
 import me.sentimize.sentimize.Models.Song;
 import me.sentimize.sentimize.Services.PlayMusicService;
 
@@ -19,7 +20,6 @@ import me.sentimize.sentimize.Services.PlayMusicService;
 public class PlaybackLogicUtil {
     private static PlayMusicService musicSrv;
     private static Intent playIntent;
-    private static boolean musicBound=false;
 
     public PlaybackLogicUtil(Context context) {
         if(playIntent==null){
@@ -31,16 +31,16 @@ public class PlaybackLogicUtil {
                     PlayMusicService.PlayMusicBinder binder = (PlayMusicService.PlayMusicBinder)service;
                     //get service
                     musicSrv = binder.getService();
-                    musicBound = true;
 
                     //fixme not being called
                     System.out.println("Playback works");
                 }
 
                 @Override
-                public void onServiceDisconnected(ComponentName name) {
-                    musicBound = false;
+                public void onServiceDisconnected(ComponentName componentName) {
+
                 }
+
             };
 
             playIntent = new Intent(context, PlayMusicService.class);
@@ -50,19 +50,13 @@ public class PlaybackLogicUtil {
     }
 
     public void playSong(){
-        if(musicBound) {
-            musicSrv.playSong();
-        }
+            musicSrv.playLocalSong();
     }
-    public void playSong(Song song) throws IOException {
-        if(musicBound) {
-            musicSrv.playSong(song);
-        }
+    public void playSong(LocalSong song)  {
+            musicSrv.playLocalSong(song);
     }
     public void pauseSong(){
-        if(musicBound) {
             musicSrv.pauseSong();
-        }
     }
 
 
