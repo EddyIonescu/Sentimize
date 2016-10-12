@@ -25,6 +25,7 @@ import me.sentimize.sentimize.Models.LocalSong;
 import me.sentimize.sentimize.Models.Song;
 import me.sentimize.sentimize.Utils.LocalMusicAnalysis;
 import me.sentimize.sentimize.Utils.LocalMusicRequisitionUtil;
+import me.sentimize.sentimize.Utils.LocalSongCaching;
 import me.sentimize.sentimize.Utils.PermissionUtils;
 import me.sentimize.sentimize.Utils.PlaybackLogicUtil;
 
@@ -53,9 +54,10 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
             getSupportFragmentManager().beginTransaction().add(R.id.list_container, firstFragment).commit();
         }
 
+        // initialize media-player
         playbackLogicUtil = new PlaybackLogicUtil(this);
 
-
+        // update seekbar
         MoodScreenActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -125,19 +127,28 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
         seekBar.setProgress(0);
     }
 
-    public void animateFAB(int fabID){
-
-    }
-
     @Override
     public void onClick(View v) {
         // without local music access we can't do anything
         if(PermissionUtils.canAccessLocalMusic(this, v)) {
+            LocalSongCaching.initDatabase(this);
 
-            SongContent.setItems(LocalMusicRequisitionUtil.getSongList(this));
+            SongContent.setItems(LocalMusicAnalysis.filterLocalSongs(LocalMusicRequisitionUtil.getSongList(this),
+                    uplifting, energetic, emotional));
 
             if (v.getId() == R.id.fab_uplifting) {
-                animateFAB(v.getId());
+                uplifting = ((uplifting+1)%3)+1;
+                switch (uplifting){
+                    case 1:
+                        fab_uplifting.setAnimation(fab_low);
+                        break;
+                    case 2:
+                        fab_uplifting.setAnimation(fab_med);
+                        break;
+                    case 3:
+                        fab_uplifting.setAnimation(fab_high);
+                }
+                fab_uplifting.animate();
             }
             else if(v.getId() == R.id.fab_energy) {
 
@@ -173,7 +184,7 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
         System.out.println("List Clicked-  - " + song.toString());
         if(song instanceof LocalSong) {
             System.out.println("Getting BPM");
-            LocalMusicAnalysis.getBPM((LocalSong)song, this);
+            LocalMusicAnalysis.getBPM((LocalSong)song);
 
             seekBar.setProgress(0);
             seekBar.setMax(song.getDuration());

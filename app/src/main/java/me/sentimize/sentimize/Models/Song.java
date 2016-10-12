@@ -10,6 +10,10 @@ public class Song {
     private String storageStatus;
     private int duration;
 
+    public int uplifting = 0;
+    public int energetic = 0;
+    public int emotional = 0;
+
     public Song(){
 
     }
@@ -20,9 +24,18 @@ public class Song {
         storageStatus = "Local";
     }
 
+    public Song(String name, String artist, int duration, int uplifting, int energetic, int emotional) {
+        this.name = name;
+        this.artist = artist;
+        storageStatus = "Local";
+        this.uplifting = uplifting;
+        this.energetic = energetic;
+        this.emotional = emotional;
+    }
+
     @Override
     public String toString() {
-        return name;
+        return name + " - " + artist; // this represents the song's id in our database
     }
 
     public int getDuration(){
@@ -31,5 +44,9 @@ public class Song {
 
     public String getStorageStatus(){
         return storageStatus;
+    }
+
+    public boolean isAnalyzed(){
+        return uplifting+energetic+emotional>0;
     }
 }

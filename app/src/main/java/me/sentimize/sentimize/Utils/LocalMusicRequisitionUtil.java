@@ -17,8 +17,8 @@ import me.sentimize.sentimize.Models.Song;
  */
 public class LocalMusicRequisitionUtil {
 
-    public static ArrayList<Song> getSongList(Activity activity) {
-        ArrayList<Song> songList = new ArrayList<>();
+    public static ArrayList<LocalSong> getSongList(Activity activity) {
+        ArrayList<LocalSong> songList = new ArrayList<>();
         if(PermissionUtils.canAccessLocalMusic(activity)) {
             ContentResolver musicResolver = activity.getContentResolver();
             Uri musicUri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;

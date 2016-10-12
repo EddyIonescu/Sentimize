@@ -38,5 +38,4 @@ public class SongContent {
         addItems(items);
     }
 
-
 }

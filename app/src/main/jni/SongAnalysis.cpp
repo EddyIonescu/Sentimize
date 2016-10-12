@@ -20,7 +20,7 @@
 #define  LOG_TAG    "testjni"
 #define  ALOG(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
 extern "C" JNIEXPORT double Java_me_sentimize_sentimize_Utils_LocalMusicAnalysis_SuperpoweredAnalyzer(
-        JNIEnv *__unused javaEnvironment, jobject __unused obj, jfloat samplerate, jstring pathstr) {
+        JNIEnv *__unused javaEnvironment, jobject __unused obj, jstring pathstr) {
     // Open the input file.
     SuperpoweredDecoder *decoder = new SuperpoweredDecoder();
 
