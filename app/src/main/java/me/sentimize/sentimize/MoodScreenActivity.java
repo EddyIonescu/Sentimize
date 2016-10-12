@@ -3,9 +3,11 @@ package me.sentimize.sentimize;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
@@ -13,6 +15,7 @@ import android.view.MenuItem;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.SeekBar;
 
 import java.io.IOException;
 
@@ -25,9 +28,11 @@ import me.sentimize.sentimize.Utils.LocalMusicRequisitionUtil;
 import me.sentimize.sentimize.Utils.PermissionUtils;
 import me.sentimize.sentimize.Utils.PlaybackLogicUtil;
 
-public class MoodScreenActivity extends AppCompatActivity implements View.OnClickListener, SongFragment.OnListFragmentInteractionListener {
+public class MoodScreenActivity extends AppCompatActivity implements View.OnClickListener, SongFragment.OnListFragmentInteractionListener, SeekBar.OnSeekBarChangeListener {
 
     private static PlaybackLogicUtil playbackLogicUtil;
+
+    private Handler mHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +53,18 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
         }
 
         playbackLogicUtil = new PlaybackLogicUtil(this);
+
+
+//Make sure you update Seekbar on UI thread
+        MoodScreenActivity.this.runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+                seekBar.setProgress(playbackLogicUtil.getProgress());
+                seekBar.setMax(playbackLogicUtil.getDuration());
+                mHandler.postDelayed(this, 100);
+            }
+        });
     }
 
     @Override
@@ -72,8 +89,9 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
     }
 
     private FloatingActionButton fab_uplifting, fab_energetic, fab_emotional;
-    private Button play_btn, pause_btn, prev_btn, skip_btn;
+    private AppCompatImageButton play_btn, pause_btn, prev_btn, skip_btn;
     private Animation fab_low, fab_med, fab_high;
+    private SeekBar seekBar;
 
     public void initFabs(){
 
@@ -90,15 +108,18 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
         fab_energetic.setOnClickListener(this);
         fab_emotional.setOnClickListener(this);
 
-        play_btn = (Button) findViewById(R.id.play_btn);
-        pause_btn = (Button) findViewById(R.id.pause_btn);
-        prev_btn = (Button) findViewById(R.id.prev_btn);
-        skip_btn= (Button) findViewById(R.id.next_btn);
+        play_btn = (AppCompatImageButton) findViewById(R.id.play_btn);
+        pause_btn = (AppCompatImageButton) findViewById(R.id.pause_btn);
+        prev_btn = (AppCompatImageButton) findViewById(R.id.prev_btn);
+        skip_btn= (AppCompatImageButton) findViewById(R.id.next_btn);
 
         play_btn.setOnClickListener(this);
         pause_btn.setOnClickListener(this);
         prev_btn.setOnClickListener(this);
         skip_btn.setOnClickListener(this);
+
+        seekBar = (SeekBar) findViewById(R.id.seek_bar);
+        seekBar.setOnSeekBarChangeListener(this);
     }
 
     public void animateFAB(int fabID){
@@ -116,7 +137,7 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
                 animateFAB(v.getId());
             } else if (v.getId() == R.id.play_btn) {
                 songPlaying(true);
-            } else if (v.getId() == R.id.fab_pause) {
+            } else if (v.getId() == R.id.pause_btn) {
                 songPlaying(false);
             } else {
                 System.out.println("Plus/close button was NOT tapped - " + this.getResources().getResourceName(v.getId()));
@@ -153,15 +174,31 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
             System.out.println("Pressed Play");
             // play song already selected
             playbackLogicUtil.playSong();
-            play_btn.setVisibility(View.VISIBLE);
-            pause_btn.setVisibility(View.GONE);
+            play_btn.setVisibility(View.GONE);
+            pause_btn.setVisibility(View.VISIBLE);
         }
         else{
             System.out.println("Pressed Pause");
             playbackLogicUtil.pauseSong();
-            play_btn.setVisibility(View.GONE);
-            pause_btn.setVisibility(View.VISIBLE);
+            play_btn.setVisibility(View.VISIBLE);
+            pause_btn.setVisibility(View.GONE);
         }
+
     }
 
+    // Implement Seekbar Methods
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+
+    }
 }

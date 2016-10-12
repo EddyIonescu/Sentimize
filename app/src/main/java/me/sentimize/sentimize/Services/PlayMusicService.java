@@ -7,6 +7,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 
@@ -14,13 +15,13 @@ import java.io.IOException;
 
 import me.sentimize.sentimize.Models.LocalSong;
 import me.sentimize.sentimize.Models.Song;
+import me.sentimize.sentimize.MoodScreenActivity;
 
 /**
  * Created by eddy on 16-07-13.
  */
 public class PlayMusicService extends Service implements
-        MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,
-        MediaPlayer.OnCompletionListener{
+        MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener{
 
     //http://code.tutsplus.com/tutorials/create-a-music-player-on-android-song-playback--mobile-22778
 
@@ -35,6 +36,8 @@ public class PlayMusicService extends Service implements
 
         initMusicPlayer();
     }
+
+
 
     public void initMusicPlayer(){
         //set player properties
@@ -64,7 +67,9 @@ public class PlayMusicService extends Service implements
 
     // playing music logic
     public void playLocalSong(){
-        player.prepareAsync();
+        if(!player.isPlaying()){
+            player.start();
+        }
     }
     public void playLocalSong(LocalSong playSong)  {
         //play a song
@@ -81,7 +86,9 @@ public class PlayMusicService extends Service implements
         player.prepareAsync();
     }
     public void pauseSong(){
-        player.pause();
+        if(player.isPlaying()) {
+            player.pause();
+        }
     }
 
     // binding to communicate with other classes
@@ -93,6 +100,18 @@ public class PlayMusicService extends Service implements
         public PlayMusicService getService() {
             return PlayMusicService.this;
         }
+    }
+
+    public int getProgress(){
+        return player.getCurrentPosition();
+    }
+
+    public int getDuration(){
+        return player.getDuration();
+    }
+
+    public boolean isPlaying(){
+        return player.isPlaying();
     }
 
     @Override

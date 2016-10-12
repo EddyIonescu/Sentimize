@@ -20,6 +20,7 @@ import me.sentimize.sentimize.Services.PlayMusicService;
 public class PlaybackLogicUtil {
     private static PlayMusicService musicSrv;
     private static Intent playIntent;
+    private boolean musicbound = false;
 
     public PlaybackLogicUtil(Context context) {
         if(playIntent==null){
@@ -31,14 +32,13 @@ public class PlaybackLogicUtil {
                     PlayMusicService.PlayMusicBinder binder = (PlayMusicService.PlayMusicBinder)service;
                     //get service
                     musicSrv = binder.getService();
-
-                    //fixme not being called
+                    musicbound = true;
                     System.out.println("Playback works");
                 }
 
                 @Override
                 public void onServiceDisconnected(ComponentName componentName) {
-
+                    musicbound = false;
                 }
 
             };
@@ -50,14 +50,24 @@ public class PlaybackLogicUtil {
     }
 
     public void playSong(){
-            musicSrv.playLocalSong();
+            if(musicbound) musicSrv.playLocalSong();
     }
     public void playSong(LocalSong song)  {
-            musicSrv.playLocalSong(song);
+        if(musicbound) musicSrv.playLocalSong(song);
     }
     public void pauseSong(){
-            musicSrv.pauseSong();
+        if(musicbound) musicSrv.pauseSong();
     }
 
+    public int getProgress(){
+        return musicbound ? musicSrv.getProgress() : 0;
+    }
 
+    public int getDuration(){
+        return musicbound ? musicSrv.getDuration() : 0;
+    }
+
+    public boolean isPlaying(){
+        return musicbound && musicSrv.isPlaying();
+    }
 }
