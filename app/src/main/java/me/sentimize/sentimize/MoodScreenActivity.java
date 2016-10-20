@@ -1,39 +1,41 @@
 package me.sentimize.sentimize;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.design.widget.CoordinatorLayout;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.Toolbar;
-import android.support.v7.widget.helper.ItemTouchHelper;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.LinearLayout;
+import android.widget.Button;
+import android.widget.SeekBar;
 
 import java.io.IOException;
-import java.io.NotActiveException;
 
 import me.sentimize.sentimize.Fragments.Song.SongContent;
 import me.sentimize.sentimize.Fragments.SongFragment;
+import me.sentimize.sentimize.Models.LocalSong;
+import me.sentimize.sentimize.Models.Song;
+import me.sentimize.sentimize.Utils.LocalMusicAnalysis;
 import me.sentimize.sentimize.Utils.LocalMusicRequisitionUtil;
+import me.sentimize.sentimize.Utils.LocalSongCaching;
 import me.sentimize.sentimize.Utils.PermissionUtils;
 import me.sentimize.sentimize.Utils.PlaybackLogicUtil;
+import me.sentimize.sentimize.Utils.SongFiltering;
 
-public class MoodScreenActivity extends AppCompatActivity implements View.OnClickListener, SongFragment.OnListFragmentInteractionListener {
+public class MoodScreenActivity extends AppCompatActivity implements View.OnClickListener, SongFragment.OnListFragmentInteractionListener, SeekBar.OnSeekBarChangeListener {
 
-    public PlaybackLogicUtil playbackLogicUtil;
+    private static PlaybackLogicUtil playbackLogicUtil;
+
+    private Handler mHandler = new Handler();
+    private boolean isPaused = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,57 +44,30 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        fab_play = (FloatingActionButton) findViewById(R.id.fab_play);
-        fab_pause = (FloatingActionButton) findViewById(R.id.fab_pause);
-        fab_play.setClickable(true);
-        fab_pause.setClickable(true);
+        initFabs();
 
-        fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab_playlist = (FloatingActionButton) findViewById(R.id.fab_playlist);
-        fab_happy = (FloatingActionButton) findViewById(R.id.fab_happy);
-        fab_sad = (FloatingActionButton) findViewById(R.id.fab_sad);
 
-        fab_open = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_open);
-        fab_close = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_close);
-        rotate_forward = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.rotate_forward);
-        rotate_backward = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.rotate_backward);
-
-        fab_play.setOnClickListener(this);
-        fab_pause.setOnClickListener(this);
-        fab.setOnClickListener(this);
-        fab_playlist.setOnClickListener(this);
-        fab_happy.setOnClickListener(this);
-        fab_sad.setOnClickListener(this);
-
-        // Check that the activity is using the layout version with
-        // the fragment_container FrameLayout
         if (findViewById(R.id.list_container) != null) {
-
-            // However, if we're being restored from a previous state,
-            // then we don't need to do anything and should return or else
-            // we could end up with overlapping fragments.
             if (savedInstanceState != null) {
                 return;
             }
-
-            // Create a new Fragment to be placed in the activity layout
-            try {
-                // Passing on animateFAB as it can't be made static, so the function pointer is being passed via reflection
-                SongFragment firstFragment = new SongFragment(this.getClass().getMethod("animateFAB"));
-
-                // In case this activity was started with special instructions from an
-                // Intent, pass the Intent's extras to the fragment as arguments
-                firstFragment.setArguments(getIntent().getExtras());
-
-                // Add the fragment to the 'fragment_container' FrameLayout
-                getSupportFragmentManager().beginTransaction()
-                        .add(R.id.list_container, firstFragment).commit();
-            } catch (NoSuchMethodException e) {
-
-            }
+            SongFragment firstFragment = new SongFragment();
+            getSupportFragmentManager().beginTransaction().add(R.id.list_container, firstFragment).commit();
         }
 
+        // initialize media-player
         playbackLogicUtil = new PlaybackLogicUtil(this);
+
+        // update seekbar
+        MoodScreenActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(!isPaused) {
+                    seekBar.setProgress(Math.min(seekBar.getProgress() + 1000, seekBar.getMax()));
+                }
+                mHandler.postDelayed(this, 1000);
+            }
+        });
     }
 
     @Override
@@ -115,59 +90,77 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
         }
         return super.onOptionsItemSelected(item);
     }
-    public static Boolean isFabOpen = false;
-    private FloatingActionButton fab, fab_playlist, fab_happy, fab_sad, fab_play, fab_pause;
-    private Animation fab_open, fab_close, rotate_forward, rotate_backward;
 
-    public void animateFAB(){
+    private FloatingActionButton fab_uplifting, fab_energetic, fab_emotional;
+    private AppCompatImageButton play_btn, pause_btn, prev_btn, skip_btn;
+    private Animation fab_low, fab_med, fab_high;
+    private SeekBar seekBar;
+    private int uplifting, energetic, emotional = 1;
 
-        if(isFabOpen){
+    public void initFabs(){
 
-            fab.startAnimation(rotate_backward);
-            fab_playlist.startAnimation(fab_close);
-            fab_happy.startAnimation(fab_close);
-            fab_sad.startAnimation(fab_close);
 
-            fab_playlist.setClickable(false);
-            fab_happy.setClickable(false);
-            fab_sad.setClickable(false);
+        fab_uplifting = (FloatingActionButton) findViewById(R.id.fab_uplifting);
+        fab_energetic = (FloatingActionButton) findViewById(R.id.fab_energy);
+        fab_emotional = (FloatingActionButton) findViewById(R.id.fab_emotion);
 
-            isFabOpen = false;
+        fab_low = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_low);
+        fab_med = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_close);
+        fab_high= AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_high);
 
-        } else {
+        fab_uplifting.setOnClickListener(this);
+        fab_energetic.setOnClickListener(this);
+        fab_emotional.setOnClickListener(this);
 
-            fab.startAnimation(rotate_forward);
-            fab_playlist.startAnimation(fab_open);
-            fab_happy.startAnimation(fab_open);
-            fab_sad.startAnimation(fab_open);
+        play_btn = (AppCompatImageButton) findViewById(R.id.play_btn);
+        pause_btn = (AppCompatImageButton) findViewById(R.id.pause_btn);
+        prev_btn = (AppCompatImageButton) findViewById(R.id.prev_btn);
+        skip_btn= (AppCompatImageButton) findViewById(R.id.next_btn);
 
-            fab_playlist.setClickable(true);
-            fab_happy.setClickable(true);
-            fab_sad.setClickable(true);
+        play_btn.setOnClickListener(this);
+        pause_btn.setOnClickListener(this);
+        prev_btn.setOnClickListener(this);
+        skip_btn.setOnClickListener(this);
 
-            isFabOpen = true;
-
-        }
+        seekBar = (SeekBar) findViewById(R.id.seek_bar);
+        seekBar.setOnSeekBarChangeListener(this);
+        seekBar.setMax(1);
+        seekBar.setProgress(0);
     }
 
     @Override
     public void onClick(View v) {
+        // without local music access we can't do anything
         if(PermissionUtils.canAccessLocalMusic(this, v)) {
-            if (v.getId() == R.id.fab) {
-                animateFAB();
-            } else if (v.getId() == R.id.fab_happy) {
-                SongContent.addItems(LocalMusicRequisitionUtil.getSongList(this));
-            } else if (v.getId() == R.id.fab_play) {
-                System.out.println("Pressed Play");
-                // play selected song
-                playbackLogicUtil.playSong();
-                fab_pause.show();
-                fab_play.hide();
-            } else if (v.getId() == R.id.fab_pause) {
-                System.out.println("Pressed Pause");
-                playbackLogicUtil.pauseSong();
-                fab_play.show();
-                fab_pause.hide();
+            LocalSongCaching.initDatabase(this);
+
+            SongContent.setItems(SongFiltering.filterLocalSongs(LocalMusicRequisitionUtil.getSongList(this),
+                    uplifting, energetic, emotional, this));
+
+            if (v.getId() == R.id.fab_uplifting) {
+                uplifting = ((uplifting+1)%3)+1;
+                switch (uplifting){
+                    case 1:
+                        fab_uplifting.setAnimation(fab_low);
+                        break;
+                    case 2:
+                        fab_uplifting.setAnimation(fab_med);
+                        break;
+                    case 3:
+                        fab_uplifting.setAnimation(fab_high);
+                }
+                fab_uplifting.animate();
+            }
+            else if(v.getId() == R.id.fab_energy) {
+
+            }
+            else if(v.getId() == R.id.fab_emotion){
+
+            }
+            else if (v.getId() == R.id.play_btn) {
+                songPlaying(true);
+            } else if (v.getId() == R.id.pause_btn) {
+                songPlaying(false);
             } else {
                 System.out.println("Plus/close button was NOT tapped - " + this.getResources().getResourceName(v.getId()));
             }
@@ -177,7 +170,7 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
-    // Implement Marshmellow Permissions Callback (can't place this in utils) :(
+    // Implement Marshmellow Permissions Callback
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -187,15 +180,49 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
                 }
     }
 
-    public void onListFragmentInteraction(SongContent.Song song) {
+    public void onListFragmentInteraction(Song song) {
         // Do different stuff
-        System.out.println("List Clicked - " + song.Name);
-        try {
-            playbackLogicUtil.playSong(song);
-        } catch (IOException e) {
-            // error playing song
-            System.out.println(e.getMessage());
+        System.out.println("List Clicked-  - " + song.toString());
+        if(song instanceof LocalSong) {
+            seekBar.setProgress(0);
+            seekBar.setMax(song.getDuration());
+            playbackLogicUtil.playSong((LocalSong)song);
         }
     }
 
+    public void songPlaying(boolean isPlaying){
+        if(isPlaying){
+            isPaused = false;
+            System.out.println("Pressed Play");
+            // play song already selected
+            playbackLogicUtil.playSong();
+            play_btn.setVisibility(View.GONE);
+            pause_btn.setVisibility(View.VISIBLE);
+        }
+        else{
+            System.out.println("Pressed Pause");
+            playbackLogicUtil.pauseSong();
+            play_btn.setVisibility(View.VISIBLE);
+            pause_btn.setVisibility(View.GONE);
+            isPaused = true;
+        }
+    }
+
+    // Implement Seekbar Methods
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+        if(playbackLogicUtil != null) {
+            playbackLogicUtil.setProgress(i);
+        }
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+
+    }
 }

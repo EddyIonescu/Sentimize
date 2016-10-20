@@ -7,22 +7,22 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import me.sentimize.sentimize.Fragments.SongFragment.OnListFragmentInteractionListener;
-import me.sentimize.sentimize.Fragments.Song.SongContent;
+import me.sentimize.sentimize.Models.Song;
 import me.sentimize.sentimize.R;
 
 import java.util.List;
 
 /**
- * {@link RecyclerView.Adapter} that can display a {@link SongContent.Song} and makes a call to the
+ * {@link RecyclerView.Adapter} that can display a {@link Song} and makes a call to the
  * specified {@link OnListFragmentInteractionListener}.
  * TODO: Replace the implementation with code for your data type.
  */
 public class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapter.ViewHolder> {
 
-    private final List<SongContent.Song> mValues;
+    private final List<Song> mValues;
     private final OnListFragmentInteractionListener mListener;
 
-    public SongRecyclerViewAdapter(List<SongContent.Song> items, OnListFragmentInteractionListener listener) {
+    public SongRecyclerViewAdapter(List<Song> items, OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }
@@ -37,9 +37,9 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerVi
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
-        holder.mNameView.setText(mValues.get(position).Name);
-        holder.mArtistView.setText(mValues.get(position).Artist);
-        holder.mStorageStatusView.setText(mValues.get(position).StorageStatus);
+        holder.mNameView.setText(mValues.get(position).name);
+        holder.mArtistView.setText(mValues.get(position).artist);
+        holder.mStorageStatusView.setText(mValues.get(position).getStorageStatus());
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,7 +63,7 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerVi
         public final TextView mNameView;
         public final TextView mStorageStatusView;
         public final TextView mArtistView;
-        public SongContent.Song mItem;
+        public Song mItem;
 
         public ViewHolder(View view) {
             super(view);

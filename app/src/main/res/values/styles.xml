@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:app="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -13,8 +13,18 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" >
+        <item name="colorPrimary">@color/colorLight</item>
+    </style>
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light">
+        <item name="colorPrimary">@color/colorLight</item>
+    </style>
+
+    <style name="Widget.Design.FloatingActionButton.Pinned" parent="Widget.Design.FloatingActionButton">
+        <item name="android:tint">@android:color/white</item>
+        <item name="layout_anchor">@id/app_bar</item>
+        <item name="layout_anchorGravity">bottom</item>
+    </style>
 
 </resources>

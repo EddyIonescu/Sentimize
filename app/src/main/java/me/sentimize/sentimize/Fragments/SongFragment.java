@@ -11,16 +11,14 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 
 import me.sentimize.sentimize.Fragments.Song.SongContent;
+import me.sentimize.sentimize.Models.Song;
 import me.sentimize.sentimize.MoodScreenActivity;
 import me.sentimize.sentimize.R;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
-import java.util.List;
 
 /**
  * A fragment representing a list of Items.
@@ -37,19 +35,12 @@ public class SongFragment extends Fragment {
     private OnListFragmentInteractionListener mListener;
     private static RecyclerView.Adapter mAdapter;
 
-    private Method AnimateFAB;
-
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
     public SongFragment(){
 
-    }
-    @SuppressLint("ValidFragment")
-    public SongFragment(Method animateFAB) {
-        // pass on AnimateFAB method via reflection to use it
-        AnimateFAB = animateFAB;
     }
 
     public static void UpdateList(){
@@ -90,15 +81,7 @@ public class SongFragment extends Fragment {
             recyclerView.setOnTouchListener(new RecyclerView.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    try {
-                        if(MoodScreenActivity.isFabOpen) {
-                            AnimateFAB.invoke(getContext());
-                        }
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    } catch (InvocationTargetException e) {
-                        e.printStackTrace();
-                    }
+                    // todo hide player when user scrolls
                     return false;
                 }
             });
@@ -143,7 +126,7 @@ public class SongFragment extends Fragment {
      */
     public interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onListFragmentInteraction(SongContent.Song item);
+        public void onListFragmentInteraction(Song item);
 
     }
 

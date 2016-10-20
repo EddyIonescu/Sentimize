@@ -7,9 +7,9 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
-import me.sentimize.sentimize.Fragments.Song.SongContent;
+import me.sentimize.sentimize.Models.LocalSong;
+import me.sentimize.sentimize.Models.Song;
 import me.sentimize.sentimize.Services.PlayMusicService;
 
 /**
@@ -20,9 +20,7 @@ import me.sentimize.sentimize.Services.PlayMusicService;
 public class PlaybackLogicUtil {
     private static PlayMusicService musicSrv;
     private static Intent playIntent;
-    private static boolean musicBound=false;
-
-    //private static ArrayList<SongContent.Song> songList = new ArrayList<SongContent.Song>();
+    private boolean musicbound = false;
 
     public PlaybackLogicUtil(Context context) {
         if(playIntent==null){
@@ -34,14 +32,15 @@ public class PlaybackLogicUtil {
                     PlayMusicService.PlayMusicBinder binder = (PlayMusicService.PlayMusicBinder)service;
                     //get service
                     musicSrv = binder.getService();
-                    musicBound = true;
+                    musicbound = true;
                     System.out.println("Playback works");
                 }
 
                 @Override
-                public void onServiceDisconnected(ComponentName name) {
-                    musicBound = false;
+                public void onServiceDisconnected(ComponentName componentName) {
+                    musicbound = false;
                 }
+
             };
 
             playIntent = new Intent(context, PlayMusicService.class);
@@ -51,20 +50,29 @@ public class PlaybackLogicUtil {
     }
 
     public void playSong(){
-        if(musicBound) {
-            musicSrv.playSong();
-        }
+            if(musicbound) musicSrv.playLocalSong();
     }
-    public void playSong(SongContent.Song song) throws IOException {
-        if(musicBound) {
-            musicSrv.playSong(song);
-        }
+    public void playSong(LocalSong song)  {
+        if(musicbound) musicSrv.playLocalSong(song);
     }
     public void pauseSong(){
-        if(musicBound) {
-            musicSrv.pauseSong();
-        }
+        if(musicbound) musicSrv.pauseSong();
     }
 
+    public int getProgress(){
+        return musicbound ? musicSrv.getProgress() : 0;
+    }
+
+    public int getDuration(){
+        return musicbound ? musicSrv.getDuration() : 0;
+    }
+
+    public boolean isPlaying(){
+        return musicbound && musicSrv.isPlaying();
+    }
+
+    public void setProgress(int i){
+        if(musicbound) musicSrv.setProgress(i);
+    }
 
 }

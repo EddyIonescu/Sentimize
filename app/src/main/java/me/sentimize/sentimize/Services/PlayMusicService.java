@@ -7,20 +7,21 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
-import me.sentimize.sentimize.Fragments.Song.SongContent;
+import me.sentimize.sentimize.Models.LocalSong;
+import me.sentimize.sentimize.Models.Song;
+import me.sentimize.sentimize.MoodScreenActivity;
 
 /**
  * Created by eddy on 16-07-13.
  */
 public class PlayMusicService extends Service implements
-        MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,
-        MediaPlayer.OnCompletionListener{
+        MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener{
 
     //http://code.tutsplus.com/tutorials/create-a-music-player-on-android-song-playback--mobile-22778
 
@@ -36,10 +37,11 @@ public class PlayMusicService extends Service implements
         initMusicPlayer();
     }
 
+
+
     public void initMusicPlayer(){
         //set player properties
-        player.setWakeMode(getApplicationContext(),
-                PowerManager.PARTIAL_WAKE_LOCK);
+        player.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
         player.setAudioStreamType(AudioManager.STREAM_MUSIC);
         player.setOnPreparedListener(this);
         player.setOnCompletionListener(this);
@@ -64,25 +66,29 @@ public class PlayMusicService extends Service implements
 
 
     // playing music logic
-    public void playSong(){
-        player.prepareAsync();
-    }
-    public void playSong(SongContent.Song playSong) throws IOException {
-        //play a song
-        player.reset();
-        //get id
-        if(playSong.IsLocal) {
-            long currSong = Long.parseLong(playSong.Id);
-            //set uri
-            Uri trackUri = ContentUris.withAppendedId(
-                    android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    currSong);
-            player.setDataSource(getApplicationContext(), trackUri);
-            player.prepareAsync();
+    public void playLocalSong(){
+        if(!player.isPlaying()) {
+            player.start();
         }
     }
+    public void playLocalSong(LocalSong playSong)  {
+        //play a song
+        player.reset();
+        Uri trackUri = playSong.getTrack();
+        System.out.println("Playing track: " + trackUri);
+        try {
+            player.setDataSource(getApplicationContext(), trackUri);
+        }
+        catch (IOException e){
+            System.out.println("Error playing song");
+            System.out.println(e.getMessage());
+        }
+        player.prepareAsync();
+    }
     public void pauseSong(){
-        player.pause();
+        if(player.isPlaying()) {
+            player.pause();
+        }
     }
 
     // binding to communicate with other classes
@@ -94,6 +100,22 @@ public class PlayMusicService extends Service implements
         public PlayMusicService getService() {
             return PlayMusicService.this;
         }
+    }
+
+    public int getProgress(){
+        return player.getCurrentPosition();
+    }
+
+    public int getDuration(){
+        return player.getDuration();
+    }
+
+    public boolean isPlaying(){
+        return player.isPlaying();
+    }
+
+    public void setProgress(int i){
+        player.seekTo(i);
     }
 
     @Override
