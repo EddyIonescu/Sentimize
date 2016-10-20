@@ -28,6 +28,7 @@ import me.sentimize.sentimize.Utils.LocalMusicRequisitionUtil;
 import me.sentimize.sentimize.Utils.LocalSongCaching;
 import me.sentimize.sentimize.Utils.PermissionUtils;
 import me.sentimize.sentimize.Utils.PlaybackLogicUtil;
+import me.sentimize.sentimize.Utils.SongFiltering;
 
 public class MoodScreenActivity extends AppCompatActivity implements View.OnClickListener, SongFragment.OnListFragmentInteractionListener, SeekBar.OnSeekBarChangeListener {
 
@@ -133,8 +134,8 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
         if(PermissionUtils.canAccessLocalMusic(this, v)) {
             LocalSongCaching.initDatabase(this);
 
-            SongContent.setItems(LocalMusicAnalysis.filterLocalSongs(LocalMusicRequisitionUtil.getSongList(this),
-                    uplifting, energetic, emotional));
+            SongContent.setItems(SongFiltering.filterLocalSongs(LocalMusicRequisitionUtil.getSongList(this),
+                    uplifting, energetic, emotional, this));
 
             if (v.getId() == R.id.fab_uplifting) {
                 uplifting = ((uplifting+1)%3)+1;
@@ -183,13 +184,9 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
         // Do different stuff
         System.out.println("List Clicked-  - " + song.toString());
         if(song instanceof LocalSong) {
-            System.out.println("Getting BPM");
-            LocalMusicAnalysis.getBPM((LocalSong)song);
-
             seekBar.setProgress(0);
             seekBar.setMax(song.getDuration());
             playbackLogicUtil.playSong((LocalSong)song);
-
         }
     }
 

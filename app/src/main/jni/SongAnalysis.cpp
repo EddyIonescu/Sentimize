@@ -19,7 +19,45 @@
 
 #define  LOG_TAG    "testjni"
 #define  ALOG(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
-extern "C" JNIEXPORT double Java_me_sentimize_sentimize_Utils_LocalMusicAnalysis_SuperpoweredAnalyzer(
+
+double getEnergy(double bpm, double overallLowFreq){
+    return ((bpm-50.0)/1.5)+1;
+}
+
+double getOverallFreq(const unsigned char *waveform, const int waveformSize){
+    double overallFreq = 0;
+    for(int i = 0; i<waveformSize; ++i){
+        overallFreq += waveform[i];
+    }
+    overallFreq /= waveformSize;
+    return overallFreq;
+}
+
+double getPositivity(int keyIndex, double overallHighFreq){
+    if(keyIndex<12){
+        return overallHighFreq/5 + 30;
+    }
+    else{
+        return overallHighFreq/5 + 1;
+    }
+}
+
+double min(double a, double b){
+    return a<b ? a : b;
+}
+double max(double a, double b){
+    return a>b ? a : b;
+}
+double absDifference(double a, double b){
+    if(a>b) return a - b;
+    else return b - a;
+}
+
+double getEmotion(int keyIndex, double overallLowFreq, double overallMidFreq, double overallHighFreq){
+    return ((keyIndex >= 12) ? 30 : 0) + max(70, min(absDifference(overallLowFreq, overallMidFreq), absDifference(overallMidFreq, overallHighFreq)));
+}
+
+extern "C" JNIEXPORT jdoubleArray Java_me_sentimize_sentimize_Utils_Superpowered_SuperpoweredAnalyzer(
         JNIEnv *__unused javaEnvironment, jobject __unused obj, jstring pathstr) {
     // Open the input file.
     SuperpoweredDecoder *decoder = new SuperpoweredDecoder();
@@ -31,15 +69,14 @@ extern "C" JNIEXPORT double Java_me_sentimize_sentimize_Utils_LocalMusicAnalysis
         ALOG(openError);
         //NSLog(@"open error: %s", openError);
         delete decoder;
-        return -1;
+        return 0;
     };
 
     // Create the analyzer.
     SuperpoweredOfflineAnalyzer *analyzer = new SuperpoweredOfflineAnalyzer(decoder->samplerate, 0, decoder->durationSeconds);
 
     // Create a buffer for the 16-bit integer samples coming from the decoder.
-    short int *intBuffer = (short int *) malloc(
-            decoder->samplesPerFrame * 2 * sizeof(short int) + 16384);
+    short int *intBuffer = (short int *) malloc(decoder->samplesPerFrame * 2 * sizeof(short int) + 16384);
     // Create a buffer for the 32-bit floating point samples required by the effect.
     float *floatBuffer = (float *) malloc(decoder->samplesPerFrame * 2 * sizeof(float) + 1024);
 
@@ -79,6 +116,15 @@ extern "C" JNIEXPORT double Java_me_sentimize_sentimize_Utils_LocalMusicAnalysis
 
     // Do something with the result.
     //@"Bpm is %f, average loudness is %f db, peak volume is %f db.", bpm, loudpartsAverageDecibel, peakDecibel);
+    double overallLowFreq = getOverallFreq(lowWaveform, waveformSize);
+    double energy = getEnergy(bpm, overallLowFreq);
+
+    double overallHighFreq = getOverallFreq(highWaveform, waveformSize);
+    double uplifting = getPositivity(keyIndex, overallHighFreq);
+
+    double overallMidFreq = getOverallFreq(midWaveform, waveformSize);
+    double emotion = getEmotion(keyIndex, overallLowFreq, overallMidFreq, overallHighFreq);
+
 
     // Done with the result, free memory.
     if (averageWaveform) free(averageWaveform);
@@ -89,6 +135,9 @@ extern "C" JNIEXPORT double Java_me_sentimize_sentimize_Utils_LocalMusicAnalysis
     if (notes) free(notes);
     if (overviewWaveform) free(overviewWaveform);
 
-    return bpm;
 
+    double results [] = {uplifting, energy, emotion, overallLowFreq, overallMidFreq, overallHighFreq, bpm};
+    jdoubleArray output = javaEnvironment->NewDoubleArray(7);
+    javaEnvironment->SetDoubleArrayRegion(output, 0, 7, &results[0]);
+    return output;
 }

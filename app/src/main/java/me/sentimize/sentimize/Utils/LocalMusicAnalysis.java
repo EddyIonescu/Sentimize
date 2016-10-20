@@ -1,10 +1,11 @@
 package me.sentimize.sentimize.Utils;
 
 
-import android.content.Context;
-import android.media.AudioManager;
+import android.os.AsyncTask;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Objects;
 
 import me.sentimize.sentimize.Models.LocalSong;
 import me.sentimize.sentimize.Models.Song;
@@ -12,84 +13,44 @@ import me.sentimize.sentimize.Models.Song;
 /**
  * Created by Eddy on 10/10/16.
  */
-public class LocalMusicAnalysis {
+
+class Superpowered{
 
     static {
         System.loadLibrary("app");
     }
 
-    public static ArrayList<Song> filterLocalSongs(ArrayList<LocalSong> songs, int uplifting, int energetic, int emotional){
-        // possible mood levels are 1, 2, and 3; 1 to 100 for analysis
-        ArrayList<Song> relevantSongs = new ArrayList<>();
-        for(LocalSong song : songs){
-            song = (LocalSong)analyzeSong(song);
-            int score = 0;
-            if(uplifting==1 && song.uplifting<40){
-                score++;
-            }
-            else if(uplifting==2 && song.uplifting>20 && song.uplifting<80){
-                score++;
-            }
-            else if(uplifting==3 && song.uplifting>60){
-                score++;
-            }
+    public static native double[] SuperpoweredAnalyzer(String path);
+}
 
-            if(energetic==1 && song.energetic<40){
-                score++;
-            }
-            else if(energetic==2 && song.energetic>20 && song.energetic<80){
-                score++;
-            }
-            else if(energetic==3 && song.energetic>60){
-                score++;
-            }
+public class LocalMusicAnalysis extends AsyncTask<LocalSong, Void, Object[]>{
 
-            if(emotional==1 && song.emotional<40){
-                score++;
-            }
-            else if(emotional==2 && song.emotional>20 && song.emotional<80){
-                score++;
-            }
-            else if(emotional==3 && song.emotional>60){
-                score++;
-            }
-
-            if(score>=2){
-                relevantSongs.add(song);
-            }
+    @Override
+    protected Object[] doInBackground(LocalSong... localSongs) {
+        double[] results = Superpowered.SuperpoweredAnalyzer((localSongs[0]).getPath());
+        Object[] objects1 = new Object[1 + results.length];
+        objects1[0] = localSongs[0];
+        for(int i = 0; i<results.length; i++){
+            objects1[i+1] = results[i];
         }
-        return relevantSongs;
+        return objects1;
     }
 
-    public static Song analyzeSong(Song song){
-        song = LocalSongCaching.getSongAnalysis(song);
-        if(song instanceof LocalSong){
-            if(!song.isAnalyzed()){
+    @Override
+    protected void onPostExecute(Object[] objects) {
+        super.onPostExecute(objects);
+        System.out.println("Results: " + Arrays.toString(objects));
 
-                System.out.println("analyzing (first-time) " + song);
-                int energetic = (int)(getBPM((LocalSong)song)/2.0);
+        int uplifting = (int)(double)objects[1];
+        int energetic = (int)(double)objects[2];
+        int emotional = (int)(double)objects[3];
 
-                // todo implement these
-                int uplifting = energetic;
-                int emotional = energetic;
+        LocalSong song = (LocalSong)objects[0];
+        song.uplifting = uplifting;
+        song.energetic = energetic;
+        song.emotional = emotional;
 
-                song.uplifting = uplifting;
-                song.energetic = energetic;
-                song.emotional = emotional;
-
-                LocalSongCaching.cacheLocalSong((LocalSong)song);
-            }
-            System.out.println("retrieved " + song);
-        }
-        return song;
+        LocalSongCaching.cacheLocalSong(song);
+        SongFiltering.showSnackbarUpdate("Analyzed " + song);
     }
-
-    public static double getBPM(LocalSong song){
-        System.out.println("path: " + song.getPath());
-        double bpm = SuperpoweredAnalyzer(song.getPath());
-        System.out.println("bpm: " + bpm);
-        return bpm;
-    }
-
-    public static native double SuperpoweredAnalyzer(String path);
 }

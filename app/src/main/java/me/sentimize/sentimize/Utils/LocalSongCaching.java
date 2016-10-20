@@ -2,7 +2,9 @@ package me.sentimize.sentimize.Utils;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
 
+import me.sentimize.sentimize.Database.SongContract;
 import me.sentimize.sentimize.Database.SongDatabaseHelper;
 import me.sentimize.sentimize.Models.LocalSong;
 import me.sentimize.sentimize.Models.Song;
@@ -20,15 +22,18 @@ public class LocalSongCaching {
     public static void cacheLocalSong(LocalSong song){
         databaseHelper.insertSong(song.toString(), song.uplifting, song.energetic, song.emotional);
     }
-    public static Song getSongAnalysis(Song song){
+    public static Song retrieveSongAnalysis(Song song){
         Cursor rs = databaseHelper.getData(song.toString());
-        if(rs==null){
-            return song;
+        try {
+            rs.moveToFirst();
+            song.uplifting = rs.getInt(rs.getColumnIndex(SongContract.SongEntry.SONGS_COLUMN_UPLIFTING));
+            song.energetic = rs.getInt(rs.getColumnIndex(SongContract.SongEntry.SONGS_COLUMN_ENERGETIC));
+            song.emotional = rs.getInt(rs.getColumnIndex(SongContract.SongEntry.SONGS_COLUMN_EMOTIONAL));
         }
-        rs.moveToFirst();
-        song.uplifting = rs.getInt(rs.getColumnIndex(SongDatabaseHelper.SONGS_COLUMN_UPLIFTING));
-        song.energetic = rs.getInt(rs.getColumnIndex(SongDatabaseHelper.SONGS_COLUMN_ENERGETIC));
-        song.emotional = rs.getInt(rs.getColumnIndex(SongDatabaseHelper.SONGS_COLUMN_EMOTIONAL));
+        catch(CursorIndexOutOfBoundsException e){
+            System.out.println(song + " not cached - " + e.getMessage());
+        }
         return song;
+        // uplifting, energetic, and emotional values will be 0 if retrieval failed, so the caller will then analyze the songs
     }
 }
