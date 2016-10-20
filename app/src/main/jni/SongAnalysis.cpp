@@ -6,15 +6,10 @@
 #include <stdlib.h>
 
 
-#include <SuperpoweredRecorder.h>
-#include <SuperpoweredAudioBuffers.h>
-#include "SuperpoweredDecoder.h"
-#include "SuperpoweredAnalyzer.h"
-#include "SuperpoweredSimple.h"
 #include <android/log.h>
-#include "../../../../SuperpoweredSDK/Superpowered/SuperpoweredSimple.h"
-#include "../../../../SuperpoweredSDK/Superpowered/SuperpoweredDecoder.h"
-#include "../../../../SuperpoweredSDK/Superpowered/SuperpoweredAnalyzer.h"
+#include "../../../../../SuperpoweredSDK/Superpowered/SuperpoweredSimple.h"
+#include "../../../../../SuperpoweredSDK/Superpowered/SuperpoweredDecoder.h"
+#include "../../../../../SuperpoweredSDK/Superpowered/SuperpoweredAnalyzer.h"
 
 
 #define  LOG_TAG    "testjni"

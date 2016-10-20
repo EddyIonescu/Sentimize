@@ -1,8 +1,0 @@
-See file:///home/eddy/Documents/Sentimize/SuperpoweredSDK/Android/FrequencyDomain/app/build/tmp/compileFrequencyDomainArmeabi-v7aDebugSharedLibraryFrequencyDomainMainCpp/output.txt for all output for compileFrequencyDomainArmeabi-v7aDebugSharedLibraryFrequencyDomainMainCpp.
-compiling FrequencyDomain.cpp failed.
-/home/eddy/Documents/Sentimize/SuperpoweredSDK/Android/FrequencyDomain/app/src/main/jni/FrequencyDomain.cpp:3:72: fatal error: ../../../../../../Superpowered/SuperpoweredFrequencyDomain.h: No such file or directory
- #include <../../../../../../Superpowered/SuperpoweredFrequencyDomain.h>
-                                                                        ^
-compilation terminated.
-
-Finished compileFrequencyDomainArmeabi-v7aDebugSharedLibraryFrequencyDomainMainCpp, see full log file:///home/eddy/Documents/Sentimize/SuperpoweredSDK/Android/FrequencyDomain/app/build/tmp/compileFrequencyDomainArmeabi-v7aDebugSharedLibraryFrequencyDomainMainCpp/output.txt.
