@@ -73,14 +73,6 @@
         app:layout_anchorGravity="bottom|end"
         android:src="@drawable/plain_heart" />
 
-    <!--on main page-->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:id="@+id/mood_container">
-    </LinearLayout>
-
     <!--list of songs-->
     <LinearLayout
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
@@ -95,6 +87,7 @@
     <include layout="@layout/fragment_player"
         app:layout_collapseMode="parallax"
         app:layout_scrollFlags="scroll|enterAlways"
+
         android:layout_gravity="center|bottom"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"/>

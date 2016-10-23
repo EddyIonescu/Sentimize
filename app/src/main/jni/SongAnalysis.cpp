@@ -28,28 +28,32 @@ double getOverallFreq(const unsigned char *waveform, const int waveformSize){
     return overallFreq;
 }
 
-double getPositivity(int keyIndex, double overallHighFreq){
-    if(keyIndex<12){
-        return overallHighFreq/5 + 30;
-    }
-    else{
-        return overallHighFreq/5 + 1;
-    }
-}
-
 double min(double a, double b){
     return a<b ? a : b;
 }
+
 double max(double a, double b){
     return a>b ? a : b;
 }
+
+double getPositivity(int keyIndex, double overallLowFreq, double overallMedFreq, double overallHighFreq){
+    if(keyIndex<12) {
+        return (max(max(overallLowFreq, overallMedFreq), overallHighFreq)-20.0)/1.6 + 30.0;
+    }
+    else{
+        return (max(max(overallLowFreq, overallMedFreq), overallHighFreq)-20.0)/1.4;
+    }
+}
+
+
 double absDifference(double a, double b){
     if(a>b) return a - b;
     else return b - a;
 }
 
 double getEmotion(int keyIndex, double overallLowFreq, double overallMidFreq, double overallHighFreq){
-    return ((keyIndex >= 12) ? 30 : 0) + max(70, min(absDifference(overallLowFreq, overallMidFreq), absDifference(overallMidFreq, overallHighFreq)));
+    return ((keyIndex >= 12) ? 30 : 0) + (2.0*min(absDifference(overallLowFreq, overallMidFreq), absDifference(overallMidFreq, overallHighFreq))
+     + max(absDifference(overallLowFreq, overallMidFreq), absDifference(overallMidFreq, overallHighFreq)));
 }
 
 extern "C" JNIEXPORT jdoubleArray Java_me_sentimize_sentimize_Utils_Superpowered_SuperpoweredAnalyzer(
@@ -114,10 +118,10 @@ extern "C" JNIEXPORT jdoubleArray Java_me_sentimize_sentimize_Utils_Superpowered
     double overallLowFreq = getOverallFreq(lowWaveform, waveformSize);
     double energy = getEnergy(bpm, overallLowFreq);
 
-    double overallHighFreq = getOverallFreq(highWaveform, waveformSize);
-    double uplifting = getPositivity(keyIndex, overallHighFreq);
-
     double overallMidFreq = getOverallFreq(midWaveform, waveformSize);
+    double overallHighFreq = getOverallFreq(highWaveform, waveformSize);
+    double uplifting = getPositivity(keyIndex, overallLowFreq, overallMidFreq, overallHighFreq);
+
     double emotion = getEmotion(keyIndex, overallLowFreq, overallMidFreq, overallHighFreq);
 
 
@@ -131,8 +135,8 @@ extern "C" JNIEXPORT jdoubleArray Java_me_sentimize_sentimize_Utils_Superpowered
     if (overviewWaveform) free(overviewWaveform);
 
 
-    double results [] = {uplifting, energy, emotion, overallLowFreq, overallMidFreq, overallHighFreq, bpm};
-    jdoubleArray output = javaEnvironment->NewDoubleArray(7);
-    javaEnvironment->SetDoubleArrayRegion(output, 0, 7, &results[0]);
+    double results [] = {uplifting, energy, emotion, bpm, overallLowFreq, overallMidFreq, overallHighFreq, keyIndex};
+    jdoubleArray output = javaEnvironment->NewDoubleArray(8);
+    javaEnvironment->SetDoubleArrayRegion(output, 0, 8, &results[0]);
     return output;
 }

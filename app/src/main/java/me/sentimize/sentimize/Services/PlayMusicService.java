@@ -16,14 +16,13 @@ import java.io.IOException;
 import me.sentimize.sentimize.Models.LocalSong;
 import me.sentimize.sentimize.Models.Song;
 import me.sentimize.sentimize.MoodScreenActivity;
+import me.sentimize.sentimize.SentiApplication;
 
 /**
- * Created by eddy on 16-07-13.
+ * Created by Eddy on 16-07-13.
  */
 public class PlayMusicService extends Service implements
         MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener{
-
-    //http://code.tutsplus.com/tutorials/create-a-music-player-on-android-song-playback--mobile-22778
 
     //media player
     private MediaPlayer player;
@@ -36,8 +35,6 @@ public class PlayMusicService extends Service implements
 
         initMusicPlayer();
     }
-
-
 
     public void initMusicPlayer(){
         //set player properties
@@ -71,6 +68,7 @@ public class PlayMusicService extends Service implements
             player.start();
         }
     }
+
     public void playLocalSong(LocalSong playSong)  {
         //play a song
         player.reset();
@@ -85,6 +83,7 @@ public class PlayMusicService extends Service implements
         }
         player.prepareAsync();
     }
+
     public void pauseSong(){
         if(player.isPlaying()) {
             player.pause();

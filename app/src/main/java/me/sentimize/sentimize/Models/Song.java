@@ -22,6 +22,7 @@ public class Song {
         this.name = name;
         this.artist = artist;
         storageStatus = "Local";
+        this.duration = duration;
     }
 
     public Song(String name, String artist, int duration, int uplifting, int energetic, int emotional) {
@@ -31,6 +32,7 @@ public class Song {
         this.uplifting = uplifting;
         this.energetic = energetic;
         this.emotional = emotional;
+        this.duration = duration;
     }
 
     @Override
