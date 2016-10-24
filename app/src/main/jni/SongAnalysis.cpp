@@ -12,7 +12,7 @@
 #include "../../../../../SuperpoweredSDK/Superpowered/SuperpoweredAnalyzer.h"
 
 
-#define  LOG_TAG    "testjni"
+#define  LOG_TAG    "SongAnalysis"
 #define  ALOG(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
 
 double getEnergy(double bpm, double overallLowFreq){
@@ -53,7 +53,7 @@ double absDifference(double a, double b){
 
 double getEmotion(int keyIndex, double overallLowFreq, double overallMidFreq, double overallHighFreq){
     return ((keyIndex >= 12) ? 30 : 0) + (2.0*min(absDifference(overallLowFreq, overallMidFreq), absDifference(overallMidFreq, overallHighFreq))
-     + max(absDifference(overallLowFreq, overallMidFreq), absDifference(overallMidFreq, overallHighFreq)));
+                                          + max(absDifference(overallLowFreq, overallMidFreq), absDifference(overallMidFreq, overallHighFreq)));
 }
 
 extern "C" JNIEXPORT jdoubleArray Java_me_sentimize_sentimize_Utils_Superpowered_SuperpoweredAnalyzer(
@@ -67,7 +67,7 @@ extern "C" JNIEXPORT jdoubleArray Java_me_sentimize_sentimize_Utils_Superpowered
         ALOG(path);
         ALOG(openError);
         //NSLog(@"open error: %s", openError);
-        delete decoder;
+        //delete decoder;
         return 0;
     };
 

@@ -26,6 +26,7 @@ import me.sentimize.sentimize.Models.LocalSongAnalysisRequest;
 import me.sentimize.sentimize.Models.Song;
 import me.sentimize.sentimize.Services.PlayMusicService;
 import me.sentimize.sentimize.Utils.LocalMusicAnalysis;
+import me.sentimize.sentimize.Utils.LocalMusicPlayer;
 import me.sentimize.sentimize.Utils.LocalMusicRequisitionUtil;
 import me.sentimize.sentimize.Utils.LocalSongCaching;
 import me.sentimize.sentimize.Utils.PermissionUtils;
@@ -55,6 +56,7 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
         }
 
         // update seekbar
+        /*
         new Thread(new Runnable() {
             public void run() {
                 while (true) {
@@ -69,6 +71,7 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
                 }
             }
         }).start();
+        */
     }
 
     @Override
@@ -154,7 +157,10 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
     }
 
     private boolean increasing = true;
-    private int changeFabSize(FloatingActionButton fab, int fromSize){
+    private int changeFabSize(final FloatingActionButton fab, int fromSize){
+        fab_uplifting.setEnabled(false);
+        fab_energetic.setEnabled(false);
+        fab_emotional.setEnabled(false);
         int toSize = 0;
         switch (fromSize){
             case 0:
@@ -171,8 +177,26 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
                 increasing = false;
                 toSize = 1;
         }
-        fab.animate();
+        new Thread(new Runnable() {
+            public void run() {
+                fab.animate();
+            }
+        }).start();
         return toSize;
+    }
+
+    public static void updateListPostAnalysis(LocalSong song){
+        if(SongFiltering.songEligible(song)){
+            SongContent.addItem(song);
+        }
+    }
+
+    private void updateList(){
+        SongContent.setItems(SongFiltering.filterLocalSongs(LocalMusicRequisitionUtil.getSongList(this),
+                uplifting, energetic, emotional, this));
+        fab_uplifting.setEnabled(true);
+        fab_energetic.setEnabled(true);
+        fab_emotional.setEnabled(true);
     }
 
     @Override
@@ -182,12 +206,15 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
 
             if (v.getId() == R.id.fab_uplifting) {
                 uplifting = changeFabSize(fab_uplifting, uplifting);
+                updateList();
             }
             else if(v.getId() == R.id.fab_energy) {
                 energetic = changeFabSize(fab_energetic, energetic);
+                updateList();
             }
             else if(v.getId() == R.id.fab_emotion){
                 emotional = changeFabSize(fab_emotional, emotional);
+                updateList();
             }
             else if (v.getId() == R.id.play_btn) {
                 pressedPlayPause();
@@ -198,10 +225,6 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
             else {
                 System.out.println("Plus/close button was NOT tapped - " + this.getResources().getResourceName(v.getId()));
             }
-
-            SongContent.setItems(SongFiltering.filterLocalSongs(LocalMusicRequisitionUtil.getSongList(this),
-                    uplifting, energetic, emotional, this));
-
             System.out.println("Uplifting: " + uplifting + " Energetic: " + energetic + " Emotional: " + emotional);
         }
         else{
@@ -223,10 +246,10 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
         // Do different stuff
         System.out.println("List Clicked-  - " + song.toString());
         if(song instanceof LocalSong) {
-            pressedPlayPause();
             seekBar.setProgress(0);
             seekBar.setMax(song.getDuration());
             SentiApplication.getPlaybackLogicUtil().playSong((LocalSong)song);
+            pressedPlayPause();
         }
     }
 

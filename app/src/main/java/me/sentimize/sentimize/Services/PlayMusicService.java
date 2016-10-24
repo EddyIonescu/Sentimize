@@ -1,5 +1,8 @@
 package me.sentimize.sentimize.Services;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentUris;
 import android.content.Intent;
@@ -16,79 +19,57 @@ import java.io.IOException;
 import me.sentimize.sentimize.Models.LocalSong;
 import me.sentimize.sentimize.Models.Song;
 import me.sentimize.sentimize.MoodScreenActivity;
+import me.sentimize.sentimize.R;
 import me.sentimize.sentimize.SentiApplication;
+import me.sentimize.sentimize.Utils.LocalMusicPlayer;
+import me.sentimize.sentimize.Utils.SongFiltering;
 
 /**
  * Created by Eddy on 16-07-13.
  */
-public class PlayMusicService extends Service implements
-        MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener{
+public class PlayMusicService extends Service {
 
-    //media player
-    private MediaPlayer player;
+    private static LocalMusicPlayer player = new LocalMusicPlayer();
 
-    public void onCreate(){
-        //create the service
-        super.onCreate();
-        //create player
-        player = new MediaPlayer();
+    public void playLocalSong(LocalSong song){
+        player.playLocalSong(song, PlayMusicService.this);
 
-        initMusicPlayer();
+        // todo add mediaplayer panel in notifications bar
+        /*
+        Intent intent = new Intent(this, MoodScreenActivity.class);
+        PendingIntent pIntent = PendingIntent.getActivity(this, (int) System.currentTimeMillis(), intent, 0);
+        Notification n  = new Notification.Builder(this)
+                .setContentTitle("Song Playing")
+                .setContentText("Subject")
+                .setSmallIcon(R.drawable.energy)
+                .setContentIntent(pIntent)
+                .setAutoCancel(true).build();
+
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        notificationManager.notify(1, n);
+        startForeground(1, n);
+        */
     }
 
-    public void initMusicPlayer(){
-        //set player properties
-        player.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-        player.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        player.setOnPreparedListener(this);
-        player.setOnCompletionListener(this);
-        player.setOnErrorListener(this);
+    public void pause(){
+        player.pause();
     }
 
-    @Override
-    public void onCompletion(MediaPlayer mp) {
-        // todo call back to playbackLogicUtil and ask for the next song
+    public void play(){
+        player.play();
     }
 
-    @Override
-    public boolean onError(MediaPlayer mp, int what, int extra) {
-        return false;
+    public int getProgress(){
+        return 0;
     }
 
-    @Override
-    public void onPrepared(MediaPlayer mp) {
-        //start playback
-        mp.start();
+    public void setProgress(int progress){
+        player.setProgress(progress);
     }
 
 
-    // playing music logic
-    public void playLocalSong(){
-        if(!player.isPlaying()) {
-            player.start();
-        }
-    }
-
-    public void playLocalSong(LocalSong playSong)  {
-        //play a song
-        player.reset();
-        Uri trackUri = playSong.getTrack();
-        System.out.println("Playing track: " + trackUri);
-        try {
-            player.setDataSource(getApplicationContext(), trackUri);
-        }
-        catch (IOException e){
-            System.out.println("Error playing song");
-            System.out.println(e.getMessage());
-        }
-        player.prepareAsync();
-    }
-
-    public void pauseSong(){
-        if(player.isPlaying()) {
-            player.pause();
-        }
-    }
 
     // binding to communicate with other classes
 
@@ -101,31 +82,14 @@ public class PlayMusicService extends Service implements
         }
     }
 
-    public int getProgress(){
-        return player.getCurrentPosition();
-    }
-
-    public int getDuration(){
-        return player.getDuration();
-    }
-
-    public boolean isPlaying(){
-        return player.isPlaying();
-    }
-
-    public void setProgress(int i){
-        player.seekTo(i);
-    }
-
     @Override
     public IBinder onBind(Intent arg0) {
+        player = new LocalMusicPlayer();
         return PlayMusicBind;
     }
 
     @Override
     public boolean onUnbind(Intent intent){
-        player.stop();
-        player.release();
         return false;
     }
 }

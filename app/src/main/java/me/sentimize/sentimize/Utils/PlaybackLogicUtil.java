@@ -13,7 +13,7 @@ import me.sentimize.sentimize.Models.Song;
 import me.sentimize.sentimize.Services.PlayMusicService;
 
 /**
- * Created by eddy on 16-07-13.
+ * Created by Eddy on 16-07-13.
  *
  * Sets up and controls the PlayMusicService based on info from MoodScreenActivity
  */
@@ -50,25 +50,17 @@ public class PlaybackLogicUtil {
     }
 
     public void playSong(){
-            if(musicbound) musicSrv.playLocalSong();
+            if(musicbound) musicSrv.play();
     }
     public void playSong(LocalSong song)  {
         if(musicbound) musicSrv.playLocalSong(song);
     }
     public void pauseSong(){
-        if(musicbound) musicSrv.pauseSong();
+        if(musicbound) musicSrv.pause();
     }
 
     public int getProgress(){
         return musicbound ? musicSrv.getProgress() : 0;
-    }
-
-    public int getDuration(){
-        return musicbound ? musicSrv.getDuration() : 0;
-    }
-
-    public boolean isPlaying(){
-        return musicbound && musicSrv.isPlaying();
     }
 
     public void setProgress(int i){

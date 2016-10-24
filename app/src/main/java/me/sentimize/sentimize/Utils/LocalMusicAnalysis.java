@@ -10,19 +10,7 @@ import java.util.Objects;
 import me.sentimize.sentimize.Models.LocalSong;
 import me.sentimize.sentimize.Models.LocalSongAnalysisRequest;
 import me.sentimize.sentimize.Models.Song;
-
-/**
- * Created by Eddy on 10/10/16.
- */
-
-class Superpowered{
-
-    static {
-        System.loadLibrary("app");
-    }
-
-    public static native double[] SuperpoweredAnalyzer(String path);
-}
+import me.sentimize.sentimize.MoodScreenActivity;
 
 
 public class LocalMusicAnalysis extends AsyncTask<LocalSongAnalysisRequest, Void, Object[]>{
@@ -67,7 +55,8 @@ public class LocalMusicAnalysis extends AsyncTask<LocalSongAnalysisRequest, Void
 
             LocalSongCaching.cacheLocalSong(song);
             LocalSongCaching.cacheLocalSongData(song, (double)objects[4], (double)objects[5], (double)objects[6], (double)objects[7], (double)objects[8]);
-            SongFiltering.showSnackbarUpdate("Analyzed " + song);
+            //SongFiltering.showSnackbarUpdate("Analyzed " + song);
+            MoodScreenActivity.updateListPostAnalysis(song);
         }
         else{
             LocalSong song = (LocalSong) objects[0];
