@@ -19,7 +19,7 @@ Steps:
 - Added deep-linking intent-filter to interface with chatbot
 
 Next Steps:
-- Facebook Messenger Chatbot Interface
+- Facebook Messenger Chatbot Interface (Publish Sentima Chatbot)
 - Smoothly-animated seek-bar
 - Spotify Integration
 - More advanced local music analysis
