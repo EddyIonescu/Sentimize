@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import me.sentimize.sentimize.Fragments.Song.NextPrevSongLogic;
 import me.sentimize.sentimize.Fragments.Song.SongContent;
 import me.sentimize.sentimize.Fragments.SongFragment;
 import me.sentimize.sentimize.Models.LocalSong;
@@ -245,6 +246,7 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
             }
             else if(v.getId() == R.id.fab_emotion){
                 emotional = changeFabSize(fab_emotional, emotional);
+                updateList();
                 SongFiltering.showSnackbarUpdate("emotion/passion analysis coming soon");
             }
             else if (v.getId() == R.id.play_btn) {
@@ -252,6 +254,12 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
             }
             else if (v.getId() == R.id.pause_btn) {
                 pressedPause();
+            }
+            else if (v.getId() == R.id.next_btn) {
+                onListFragmentInteraction(NextPrevSongLogic.nextSong());
+            }
+            else if (v.getId() == R.id.prev_btn) {
+                onListFragmentInteraction(NextPrevSongLogic.prevSong());
             }
             else {
                 System.out.println("Plus/close button was NOT tapped - " + this.getResources().getResourceName(v.getId()));
@@ -273,10 +281,12 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
                 }
     }
 
+
     public void onListFragmentInteraction(Song song) {
         // Do different stuff
         System.out.println("List Clicked-  - " + song.toString());
         if(song instanceof LocalSong) {
+            NextPrevSongLogic.setCurrentSong(song);
             seekBar.setProgress(0);
             seekBar.setMax(song.getDuration());
             SentiApplication.getPlaybackLogicUtil().playSong((LocalSong)song);
