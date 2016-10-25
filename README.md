@@ -6,7 +6,19 @@ Adjusting the positivity and energy level will generate a list of your songs (lo
 
 <a href="https://play.google.com/store/apps/details?id=me.sentimize.sentimize&hl=en">Get it on Google Play</a>
 
-Future Releases:
+
+Steps:
+- Made List showing the songs (implementing SongFragment and a ListAdapter)
+- Added the <a href="http://superpowered.com/">SuperPowered SDK</a> using the experimental version of Gradle (supports NDK)
+- Interfaced with the SDK through C++ functions implemented using the JNI
+- Made music-analysis an asyncronous task so that it runs in the background
+- Interfaced with the Superpowered SDK to provide music-playback and also put that on its own thread running on a service
+- Added media-player controls
+- Added animated floating action buttons
+- Added SQLite database for song caching
+- Added deep-linking intent-filter to interface with chatbot
+
+Next Steps:
 - Facebook Messenger Chatbot Interface
 - Smoothly-animated seek-bar
 - Spotify Integration
