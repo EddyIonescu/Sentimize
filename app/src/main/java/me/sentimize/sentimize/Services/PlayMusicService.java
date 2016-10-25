@@ -1,7 +1,12 @@
 package me.sentimize.sentimize.Services;
 
+import android.app.Instrumentation;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -9,86 +14,75 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.PowerManager;
+import android.view.KeyEvent;
 
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import me.sentimize.sentimize.Models.LocalSong;
 import me.sentimize.sentimize.Models.Song;
 import me.sentimize.sentimize.MoodScreenActivity;
+import me.sentimize.sentimize.R;
 import me.sentimize.sentimize.SentiApplication;
+import me.sentimize.sentimize.Utils.LocalMusicPlayer;
+import me.sentimize.sentimize.Utils.SongFiltering;
 
 /**
  * Created by Eddy on 16-07-13.
  */
-public class PlayMusicService extends Service implements
-        MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener{
+public class PlayMusicService extends Service{
 
-    //media player
-    private MediaPlayer player;
+    private static LocalMusicPlayer player;
 
-    public void onCreate(){
-        //create the service
-        super.onCreate();
-        //create player
-        player = new MediaPlayer();
+    public void playLocalSong(LocalSong song){
 
-        initMusicPlayer();
+        Message m = Message.obtain();
+        m.what = getResources().getInteger(R.integer.PLAY_LOCAL_SONG);
+        m.obj = song;
+        player.playerHandler.sendMessage(m);
+
+        // todo add mediaplayer panel in notifications bar
+        /*
+        Intent intent = new Intent(this, MoodScreenActivity.class);
+        PendingIntent pIntent = PendingIntent.getActivity(this, (int) System.currentTimeMillis(), intent, 0);
+        Notification n  = new Notification.Builder(this)
+                .setContentTitle("Song Playing")
+                .setContentText("Subject")
+                .setSmallIcon(R.drawable.energy)
+                .setContentIntent(pIntent)
+                .setAutoCancel(true).build();
+
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        notificationManager.notify(1, n);
+        startForeground(1, n);
+        */
     }
 
-    public void initMusicPlayer(){
-        //set player properties
-        player.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-        player.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        player.setOnPreparedListener(this);
-        player.setOnCompletionListener(this);
-        player.setOnErrorListener(this);
+    public void pause(){
+        Message m = Message.obtain();
+        m.what = getResources().getInteger(R.integer.PAUSE);
+        player.playerHandler.sendMessage(m);
     }
 
-    @Override
-    public void onCompletion(MediaPlayer mp) {
-        // todo call back to playbackLogicUtil and ask for the next song
+    public void play(){
+        Message m = Message.obtain();
+        m.what = getResources().getInteger(R.integer.PLAY);
+        player.playerHandler.sendMessage(m);
     }
 
-    @Override
-    public boolean onError(MediaPlayer mp, int what, int extra) {
-        return false;
-    }
-
-    @Override
-    public void onPrepared(MediaPlayer mp) {
-        //start playback
-        mp.start();
+    public void setProgress(int progress){
+        Message m = Message.obtain();
+        m.what = getResources().getInteger(R.integer.SET_PROGRESS);
+        m.arg1 = progress;
+        player.playerHandler.sendMessage(m);
     }
 
 
-    // playing music logic
-    public void playLocalSong(){
-        if(!player.isPlaying()) {
-            player.start();
-        }
-    }
-
-    public void playLocalSong(LocalSong playSong)  {
-        //play a song
-        player.reset();
-        Uri trackUri = playSong.getTrack();
-        System.out.println("Playing track: " + trackUri);
-        try {
-            player.setDataSource(getApplicationContext(), trackUri);
-        }
-        catch (IOException e){
-            System.out.println("Error playing song");
-            System.out.println(e.getMessage());
-        }
-        player.prepareAsync();
-    }
-
-    public void pauseSong(){
-        if(player.isPlaying()) {
-            player.pause();
-        }
-    }
 
     // binding to communicate with other classes
 
@@ -101,31 +95,17 @@ public class PlayMusicService extends Service implements
         }
     }
 
-    public int getProgress(){
-        return player.getCurrentPosition();
-    }
-
-    public int getDuration(){
-        return player.getDuration();
-    }
-
-    public boolean isPlaying(){
-        return player.isPlaying();
-    }
-
-    public void setProgress(int i){
-        player.seekTo(i);
-    }
-
     @Override
     public IBinder onBind(Intent arg0) {
+        if(player==null) {
+            player = new LocalMusicPlayer(PlayMusicService.this);
+            player.start();
+        }
         return PlayMusicBind;
     }
 
     @Override
     public boolean onUnbind(Intent intent){
-        player.stop();
-        player.release();
         return false;
     }
 }

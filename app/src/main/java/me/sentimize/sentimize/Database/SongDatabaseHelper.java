@@ -42,7 +42,7 @@ public class SongDatabaseHelper extends SQLiteOpenHelper {
         contentValues.put(SongContract.SongEntry.SONGS_COLUMN_UPLIFTING, uplifting);
         contentValues.put(SongContract.SongEntry.SONGS_COLUMN_ENERGETIC, energetic);
         contentValues.put(SongContract.SongEntry.SONGS_COLUMN_EMOTIONAL, emotional);
-        db.insert(SongContract.SongEntry.SONGS_TABLE_NAME, null, contentValues);
+        db.insertWithOnConflict(SongContract.SongEntry.SONGS_TABLE_NAME, null, contentValues, SQLiteDatabase.CONFLICT_REPLACE);
         return true;
     }
 

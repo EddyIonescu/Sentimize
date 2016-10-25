@@ -1,6 +1,8 @@
 package me.sentimize.sentimize;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -9,16 +11,21 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.Toolbar;
+import android.view.Surface;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.SeekBar;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Timer;
+import java.util.TimerTask;
 
+import me.sentimize.sentimize.Fragments.Song.NextPrevSongLogic;
 import me.sentimize.sentimize.Fragments.Song.SongContent;
 import me.sentimize.sentimize.Fragments.SongFragment;
 import me.sentimize.sentimize.Models.LocalSong;
@@ -26,6 +33,7 @@ import me.sentimize.sentimize.Models.LocalSongAnalysisRequest;
 import me.sentimize.sentimize.Models.Song;
 import me.sentimize.sentimize.Services.PlayMusicService;
 import me.sentimize.sentimize.Utils.LocalMusicAnalysis;
+import me.sentimize.sentimize.Utils.LocalMusicPlayer;
 import me.sentimize.sentimize.Utils.LocalMusicRequisitionUtil;
 import me.sentimize.sentimize.Utils.LocalSongCaching;
 import me.sentimize.sentimize.Utils.PermissionUtils;
@@ -35,6 +43,7 @@ import me.sentimize.sentimize.Utils.SongFiltering;
 public class MoodScreenActivity extends AppCompatActivity implements View.OnClickListener, SongFragment.OnListFragmentInteractionListener, SeekBar.OnSeekBarChangeListener {
 
     private boolean isPlaying = false;
+    final Handler seekHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +53,7 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
         setSupportActionBar(toolbar);
 
         initFabs();
+        lockOrientation();
 
         // initialize music list fragment
         if (findViewById(R.id.list_container) != null) {
@@ -54,22 +64,30 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
             getSupportFragmentManager().beginTransaction().add(R.id.list_container, firstFragment).commit();
         }
 
-        // update seekbar
-        new Thread(new Runnable() {
-            public void run() {
-                while (true) {
-                    if(isPlaying) {
-                        seekBar.setProgress(seekBar.getProgress()+10000);
-                    }
-                    try {
-                        Thread.sleep(10000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }).start();
+        /*
+        Timer updateBar = new Timer();
+        updateBar.schedule(new TimerTask() {
+            @Override
+            public void run() {updateSeekbar();}
+        }, 0, 10000);
+        */
     }
+
+    private void updateSeekbar(){
+        if(isPlaying) {
+            seekBar.setProgress(seekBar.getProgress()+10000);
+        }
+        //seekHandler.post(seekRunnable);
+
+    }
+
+    final Runnable seekRunnable = new Runnable() {
+        public void run() {
+            if(isPlaying) {
+                seekBar.setProgress(seekBar.getProgress()+6000);
+            }
+        }
+    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -128,10 +146,10 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
         fab_energetic = (FloatingActionButton) findViewById(R.id.fab_energy);
         fab_emotional = (FloatingActionButton) findViewById(R.id.fab_emotion);
 
-        fab_lowtomed = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_lowtomed);
-        fab_medtolow = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_medtolow);
-        fab_medtohigh= AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_medtohigh);
-        fab_hightomed= AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_hightomed);
+        fab_lowtomed = AnimationUtils.loadAnimation(this, R.anim.fab_lowtomed);
+        fab_medtolow = AnimationUtils.loadAnimation(this, R.anim.fab_medtolow);
+        fab_medtohigh= AnimationUtils.loadAnimation(this, R.anim.fab_medtohigh);
+        fab_hightomed= AnimationUtils.loadAnimation(this, R.anim.fab_hightomed);
 
         fab_uplifting.setOnClickListener(this);
         fab_energetic.setOnClickListener(this);
@@ -153,8 +171,32 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
         seekBar.setProgress(0);
     }
 
+    private void lockOrientation(){
+        int orientation = this.getRequestedOrientation();
+        int rotation = ((WindowManager) this.getSystemService(
+                Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
+        switch (rotation) {
+            case Surface.ROTATION_0:
+                orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+                break;
+            case Surface.ROTATION_90:
+                orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+                break;
+            case Surface.ROTATION_180:
+                orientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
+                break;
+            default:
+                orientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+                break;
+        }
+        this.setRequestedOrientation(orientation);
+    }
+
     private boolean increasing = true;
-    private int changeFabSize(FloatingActionButton fab, int fromSize){
+    private int changeFabSize(final FloatingActionButton fab, int fromSize){
+        fab_uplifting.setEnabled(false);
+        fab_energetic.setEnabled(false);
+        fab_emotional.setEnabled(false);
         int toSize = 0;
         switch (fromSize){
             case 0:
@@ -175,6 +217,20 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
         return toSize;
     }
 
+    public static void updateListPostAnalysis(LocalSong song){
+        if(SongFiltering.songEligible(song)){
+            SongContent.addItem(song);
+        }
+    }
+
+    private void updateList(){
+        SongContent.setItems(SongFiltering.filterLocalSongs(LocalMusicRequisitionUtil.getSongList(this),
+                uplifting, energetic, emotional, this));
+        fab_uplifting.setEnabled(true);
+        fab_energetic.setEnabled(true);
+        fab_emotional.setEnabled(true);
+    }
+
     @Override
     public void onClick(View v) {
         // without local music access we can't do anything
@@ -182,26 +238,32 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
 
             if (v.getId() == R.id.fab_uplifting) {
                 uplifting = changeFabSize(fab_uplifting, uplifting);
+                updateList();
             }
             else if(v.getId() == R.id.fab_energy) {
                 energetic = changeFabSize(fab_energetic, energetic);
+                updateList();
             }
             else if(v.getId() == R.id.fab_emotion){
                 emotional = changeFabSize(fab_emotional, emotional);
+                updateList();
+                SongFiltering.showSnackbarUpdate("emotion/passion analysis coming soon");
             }
             else if (v.getId() == R.id.play_btn) {
-                pressedPlayPause();
+                pressedPlay();
             }
             else if (v.getId() == R.id.pause_btn) {
-                pressedPlayPause();
+                pressedPause();
+            }
+            else if (v.getId() == R.id.next_btn) {
+                onListFragmentInteraction(NextPrevSongLogic.nextSong());
+            }
+            else if (v.getId() == R.id.prev_btn) {
+                onListFragmentInteraction(NextPrevSongLogic.prevSong());
             }
             else {
                 System.out.println("Plus/close button was NOT tapped - " + this.getResources().getResourceName(v.getId()));
             }
-
-            SongContent.setItems(SongFiltering.filterLocalSongs(LocalMusicRequisitionUtil.getSongList(this),
-                    uplifting, energetic, emotional, this));
-
             System.out.println("Uplifting: " + uplifting + " Energetic: " + energetic + " Emotional: " + emotional);
         }
         else{
@@ -219,32 +281,34 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
                 }
     }
 
+
     public void onListFragmentInteraction(Song song) {
         // Do different stuff
         System.out.println("List Clicked-  - " + song.toString());
         if(song instanceof LocalSong) {
-            pressedPlayPause();
+            NextPrevSongLogic.setCurrentSong(song);
             seekBar.setProgress(0);
             seekBar.setMax(song.getDuration());
             SentiApplication.getPlaybackLogicUtil().playSong((LocalSong)song);
+            pressedPlay();
         }
     }
 
-    public void pressedPlayPause(){
-        isPlaying = !isPlaying;
-        if(isPlaying){
-            System.out.println("Pressed Play");
-            // play song already selected
-            SentiApplication.getPlaybackLogicUtil().playSong();
-            play_btn.setVisibility(View.GONE);
-            pause_btn.setVisibility(View.VISIBLE);
-        }
-        else{
-            System.out.println("Pressed Pause");
-            SentiApplication.getPlaybackLogicUtil().pauseSong();
-            play_btn.setVisibility(View.VISIBLE);
-            pause_btn.setVisibility(View.GONE);
-        }
+    public void pressedPlay(){
+        isPlaying = true;
+        System.out.println("Pressed Play");
+        // play song already selected
+        SentiApplication.getPlaybackLogicUtil().playSong();
+        play_btn.setVisibility(View.GONE);
+        pause_btn.setVisibility(View.VISIBLE);
+    }
+
+    public void pressedPause(){
+        isPlaying = false;
+        System.out.println("Pressed Pause");
+        SentiApplication.getPlaybackLogicUtil().pauseSong();
+        play_btn.setVisibility(View.VISIBLE);
+        pause_btn.setVisibility(View.GONE);
     }
 
     // Implement Seekbar Methods
