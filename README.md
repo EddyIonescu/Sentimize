@@ -11,7 +11,7 @@ Steps:
 - Made List showing the songs (implementing SongFragment and a ListAdapter)
 - Added the <a href="http://superpowered.com/">SuperPowered SDK</a> using the experimental version of Gradle (supports NDK)
 - Interfaced with the SDK through C++ functions implemented using the JNI
-- Made music-analysis an asyncronous task so that it runs in the background
+- Made music-analysis an asynchronous task so that it runs in the background
 - Interfaced with the Superpowered SDK to provide music-playback and also put that on its own thread running on a service
 - Added media-player controls
 - Added animated floating action buttons
