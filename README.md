@@ -24,4 +24,4 @@ Next Steps:
 - Spotify Integration
 - More advanced local music analysis
 
-<iframe src="https://docs.google.com/document/d/1mEn01a33teceP42IE8Z2EYEMu-zLrcKgEfKIAbaYasM/pub?embedded=true"></iframe>
+<a href="https://docs.google.com/document/d/1mEn01a33teceP42IE8Z2EYEMu-zLrcKgEfKIAbaYasM/edit?usp=sharing">Mood Analysis Implementation Details</a>
