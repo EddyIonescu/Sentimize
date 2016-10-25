@@ -37,10 +37,10 @@ public class SongFiltering {
             score++;
         }
 
-        if(energetic==0 && song.energetic<41){
+        if(energetic==0 && song.energetic<35){
             score++;
         }
-        else if(energetic==1 && song.energetic>40 && song.energetic<75){
+        else if(energetic==1 && song.energetic>30 && song.energetic<75){
             score++;
         }
         else if(energetic==2 && song.energetic>70){

@@ -37,6 +37,7 @@ public class LocalMusicPlayer extends Thread{
     @Override
     public void run(){
         Looper.prepare();
+
         playerHandler = new Handler()
         {
             public void handleMessage(Message msg)
@@ -57,10 +58,12 @@ public class LocalMusicPlayer extends Thread{
                 }
             }
         };
+
         Looper.loop();
     }
 
     private void playLocalSong(final LocalSong song) {
+
         // Get the device's sample rate and buffer size to enable low-latency Android audio output, if available.
         String samplerateString = null, buffersizeString = null;
         AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);

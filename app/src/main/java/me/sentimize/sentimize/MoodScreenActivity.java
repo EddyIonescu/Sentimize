@@ -22,6 +22,8 @@ import android.widget.SeekBar;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import me.sentimize.sentimize.Fragments.Song.SongContent;
 import me.sentimize.sentimize.Fragments.SongFragment;
@@ -40,6 +42,7 @@ import me.sentimize.sentimize.Utils.SongFiltering;
 public class MoodScreenActivity extends AppCompatActivity implements View.OnClickListener, SongFragment.OnListFragmentInteractionListener, SeekBar.OnSeekBarChangeListener {
 
     private boolean isPlaying = false;
+    final Handler seekHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +52,7 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
         setSupportActionBar(toolbar);
 
         initFabs();
+        lockOrientation();
 
         // initialize music list fragment
         if (findViewById(R.id.list_container) != null) {
@@ -59,24 +63,30 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
             getSupportFragmentManager().beginTransaction().add(R.id.list_container, firstFragment).commit();
         }
 
-        // update seekbar
+        /*
+        Timer updateBar = new Timer();
+        updateBar.schedule(new TimerTask() {
+            @Override
+            public void run() {updateSeekbar();}
+        }, 0, 10000);
+        */
+    }
 
-        new Thread(new Runnable() {
-            public void run() {
-                while (true) {
-                    if(isPlaying) {
-                        seekBar.setProgress(seekBar.getProgress()+1000);
-                    }
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }).start();
+    private void updateSeekbar(){
+        if(isPlaying) {
+            seekBar.setProgress(seekBar.getProgress()+10000);
+        }
+        //seekHandler.post(seekRunnable);
 
     }
+
+    final Runnable seekRunnable = new Runnable() {
+        public void run() {
+            if(isPlaying) {
+                seekBar.setProgress(seekBar.getProgress()+6000);
+            }
+        }
+    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -135,10 +145,10 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
         fab_energetic = (FloatingActionButton) findViewById(R.id.fab_energy);
         fab_emotional = (FloatingActionButton) findViewById(R.id.fab_emotion);
 
-        fab_lowtomed = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_lowtomed);
-        fab_medtolow = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_medtolow);
-        fab_medtohigh= AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_medtohigh);
-        fab_hightomed= AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_hightomed);
+        fab_lowtomed = AnimationUtils.loadAnimation(this, R.anim.fab_lowtomed);
+        fab_medtolow = AnimationUtils.loadAnimation(this, R.anim.fab_medtolow);
+        fab_medtohigh= AnimationUtils.loadAnimation(this, R.anim.fab_medtohigh);
+        fab_hightomed= AnimationUtils.loadAnimation(this, R.anim.fab_hightomed);
 
         fab_uplifting.setOnClickListener(this);
         fab_energetic.setOnClickListener(this);
@@ -202,11 +212,7 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
                 increasing = false;
                 toSize = 1;
         }
-        new Thread(new Runnable() {
-            public void run() {
-                fab.animate();
-            }
-        }).start();
+        fab.animate();
         return toSize;
     }
 
@@ -239,7 +245,7 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
             }
             else if(v.getId() == R.id.fab_emotion){
                 emotional = changeFabSize(fab_emotional, emotional);
-                updateList();
+                SongFiltering.showSnackbarUpdate("emotion/passion analysis coming soon");
             }
             else if (v.getId() == R.id.play_btn) {
                 pressedPlay();
