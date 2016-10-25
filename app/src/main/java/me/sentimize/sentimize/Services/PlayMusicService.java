@@ -1,10 +1,12 @@
 package me.sentimize.sentimize.Services;
 
+import android.app.Instrumentation;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -12,9 +14,13 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.PowerManager;
+import android.view.KeyEvent;
 
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import me.sentimize.sentimize.Models.LocalSong;
 import me.sentimize.sentimize.Models.Song;
@@ -27,12 +33,16 @@ import me.sentimize.sentimize.Utils.SongFiltering;
 /**
  * Created by Eddy on 16-07-13.
  */
-public class PlayMusicService extends Service {
+public class PlayMusicService extends Service{
 
-    private static LocalMusicPlayer player = new LocalMusicPlayer();
+    private static LocalMusicPlayer player;
 
     public void playLocalSong(LocalSong song){
-        player.playLocalSong(song, PlayMusicService.this);
+
+        Message m = Message.obtain();
+        m.what = getResources().getInteger(R.integer.PLAY_LOCAL_SONG);
+        m.obj = song;
+        player.playerHandler.sendMessage(m);
 
         // todo add mediaplayer panel in notifications bar
         /*
@@ -54,19 +64,22 @@ public class PlayMusicService extends Service {
     }
 
     public void pause(){
-        player.pause();
+        Message m = Message.obtain();
+        m.what = getResources().getInteger(R.integer.PAUSE);
+        player.playerHandler.sendMessage(m);
     }
 
     public void play(){
-        player.play();
-    }
-
-    public int getProgress(){
-        return 0;
+        Message m = Message.obtain();
+        m.what = getResources().getInteger(R.integer.PLAY);
+        player.playerHandler.sendMessage(m);
     }
 
     public void setProgress(int progress){
-        player.setProgress(progress);
+        Message m = Message.obtain();
+        m.what = getResources().getInteger(R.integer.SET_PROGRESS);
+        m.arg1 = progress;
+        player.playerHandler.sendMessage(m);
     }
 
 
@@ -84,7 +97,10 @@ public class PlayMusicService extends Service {
 
     @Override
     public IBinder onBind(Intent arg0) {
-        player = new LocalMusicPlayer();
+        if(player==null) {
+            player = new LocalMusicPlayer(PlayMusicService.this);
+            player.start();
+        }
         return PlayMusicBind;
     }
 

@@ -11,7 +11,7 @@ public class Superpowered{
     }
 
     public static native double[] SuperpoweredAnalyzer(String path);
-    public static native void MusicPlayer(String path, int sampleRate, int buffersize);
+    public static native boolean MusicPlayer(String path, int sampleRate, int buffersize);
     public static native void onPlayPause(boolean play);
     public static native void setProgress(int progress);
 }

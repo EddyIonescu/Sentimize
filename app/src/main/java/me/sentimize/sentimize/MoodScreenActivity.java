@@ -1,6 +1,8 @@
 package me.sentimize.sentimize;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -9,9 +11,11 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.Toolbar;
+import android.view.Surface;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.SeekBar;
@@ -56,22 +60,22 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
         }
 
         // update seekbar
-        /*
+
         new Thread(new Runnable() {
             public void run() {
                 while (true) {
                     if(isPlaying) {
-                        seekBar.setProgress(seekBar.getProgress()+10000);
+                        seekBar.setProgress(seekBar.getProgress()+1000);
                     }
                     try {
-                        Thread.sleep(10000);
+                        Thread.sleep(1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
             }
         }).start();
-        */
+
     }
 
     @Override
@@ -156,6 +160,27 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
         seekBar.setProgress(0);
     }
 
+    private void lockOrientation(){
+        int orientation = this.getRequestedOrientation();
+        int rotation = ((WindowManager) this.getSystemService(
+                Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
+        switch (rotation) {
+            case Surface.ROTATION_0:
+                orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+                break;
+            case Surface.ROTATION_90:
+                orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+                break;
+            case Surface.ROTATION_180:
+                orientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
+                break;
+            default:
+                orientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+                break;
+        }
+        this.setRequestedOrientation(orientation);
+    }
+
     private boolean increasing = true;
     private int changeFabSize(final FloatingActionButton fab, int fromSize){
         fab_uplifting.setEnabled(false);
@@ -217,10 +242,10 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
                 updateList();
             }
             else if (v.getId() == R.id.play_btn) {
-                pressedPlayPause();
+                pressedPlay();
             }
             else if (v.getId() == R.id.pause_btn) {
-                pressedPlayPause();
+                pressedPause();
             }
             else {
                 System.out.println("Plus/close button was NOT tapped - " + this.getResources().getResourceName(v.getId()));
@@ -249,25 +274,25 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
             seekBar.setProgress(0);
             seekBar.setMax(song.getDuration());
             SentiApplication.getPlaybackLogicUtil().playSong((LocalSong)song);
-            pressedPlayPause();
+            pressedPlay();
         }
     }
 
-    public void pressedPlayPause(){
-        isPlaying = !isPlaying;
-        if(isPlaying){
-            System.out.println("Pressed Play");
-            // play song already selected
-            SentiApplication.getPlaybackLogicUtil().playSong();
-            play_btn.setVisibility(View.GONE);
-            pause_btn.setVisibility(View.VISIBLE);
-        }
-        else{
-            System.out.println("Pressed Pause");
-            SentiApplication.getPlaybackLogicUtil().pauseSong();
-            play_btn.setVisibility(View.VISIBLE);
-            pause_btn.setVisibility(View.GONE);
-        }
+    public void pressedPlay(){
+        isPlaying = true;
+        System.out.println("Pressed Play");
+        // play song already selected
+        SentiApplication.getPlaybackLogicUtil().playSong();
+        play_btn.setVisibility(View.GONE);
+        pause_btn.setVisibility(View.VISIBLE);
+    }
+
+    public void pressedPause(){
+        isPlaying = false;
+        System.out.println("Pressed Pause");
+        SentiApplication.getPlaybackLogicUtil().pauseSong();
+        play_btn.setVisibility(View.VISIBLE);
+        pause_btn.setVisibility(View.GONE);
     }
 
     // Implement Seekbar Methods

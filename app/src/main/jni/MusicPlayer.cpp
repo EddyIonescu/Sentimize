@@ -42,6 +42,7 @@ bool MusicPlayer::process(short int *output, unsigned int numberOfSamples) {
     bool thereIsSound = player->process(stereoBuffer, false, numberOfSamples);
     //if(thereIsSound) ALOG("loc 6 process there is sound");
     // The stereoBuffer is ready now, let's put the finished audio into the requested buffers.
+    audioWorking = thereIsSound;
     if (thereIsSound) SuperpoweredFloatToShortInt(stereoBuffer, output, numberOfSamples);
    // ALOG("loc 8 end processing");
     return thereIsSound;
@@ -53,6 +54,7 @@ static bool audioProcessing(void *clientdata, short int *audioIO, int numberOfSa
 }
 
 MusicPlayer::MusicPlayer(unsigned int samplerate, unsigned int buffersize, const char *path) {
+    audioWorking = false;
     stereoBuffer = (float *)memalign(16, (buffersize + 16) * sizeof(float) * 2);
     ALOG("loc2 ctor");
     player = new SuperpoweredAdvancedAudioPlayer(&player , playerEventCallback, samplerate, 0);
@@ -77,15 +79,20 @@ void MusicPlayer::onPlayPause(bool play) {
     };
 }
 
+bool MusicPlayer::getAudioWorking() {
+    return audioWorking;
+}
 
 static MusicPlayer *sentiPlayer = NULL;
 
-extern "C" JNIEXPORT void Java_me_sentimize_sentimize_Utils_Superpowered_MusicPlayer(JNIEnv *javaEnvironment, jobject __unused obj, jstring songstr, jint samplerate, jint buffersize ) {
+// plays the song - returns whether it is playing it (in case of AUDIO_OUTPUT_FLAG_FAST denied by client - unsupported sample rate)
+extern "C" JNIEXPORT jboolean Java_me_sentimize_sentimize_Utils_Superpowered_MusicPlayer(JNIEnv *javaEnvironment, jobject __unused obj, jstring songstr, jint samplerate, jint buffersize ) {
     ALOG("loc1 entry");
     const char *path = javaEnvironment->GetStringUTFChars(songstr, false);
     ALOG(path);
     if(sentiPlayer != NULL) delete sentiPlayer; // if an existing song is already loaded
     sentiPlayer = new MusicPlayer((unsigned int)samplerate, (unsigned int)buffersize, path);
+    return sentiPlayer->getAudioWorking();
 }
 
 extern "C" JNIEXPORT void Java_me_sentimize_sentimize_Utils_Superpowered_onPlayPause(JNIEnv * __unused javaEnvironment, jobject __unused obj, jboolean play) {

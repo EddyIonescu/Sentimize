@@ -9,7 +9,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/text_margin"
-        android:textSize="20sp"
+        android:textSize="16sp"
+        android:layout_gravity="start"
+        android:gravity="bottom"
         android:textAppearance="?attr/textAppearanceListItem" />
 
     <LinearLayout
@@ -27,10 +29,10 @@
                 android:textColor="@android:color/white"
                 android:overScrollMode="always"
                 android:singleLine="true"
-                android:padding="3dp"
                 android:textSize="12sp"
                 android:textAppearance="?attr/textAppearanceListItem"
-                android:layout_gravity="center_vertical"/>
+                android:layout_gravity="center_horizontal"
+                android:gravity="bottom"/>
         </FrameLayout>
         <TextView
             android:id="@+id/artist"
@@ -39,7 +41,9 @@
             android:layout_margin="@dimen/text_margin"
             android:overScrollMode="always"
             android:singleLine="true"
-            android:textSize="16sp"
+            android:layout_gravity="center_horizontal"
+            android:gravity="bottom"
+            android:textSize="14sp"
             android:textAppearance="?attr/textAppearanceListItem" />
     </LinearLayout>
 </LinearLayout>

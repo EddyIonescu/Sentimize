@@ -59,10 +59,6 @@ public class PlaybackLogicUtil {
         if(musicbound) musicSrv.pause();
     }
 
-    public int getProgress(){
-        return musicbound ? musicSrv.getProgress() : 0;
-    }
-
     public void setProgress(int i){
         if(musicbound) musicSrv.setProgress(i);
     }

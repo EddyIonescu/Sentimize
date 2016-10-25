@@ -18,9 +18,11 @@ public:
     void onPlayPause(bool play);
     void setPosition(int position);
     bool process(short int *output, unsigned int numberOfSamples);
+    bool getAudioWorking();
 
 private:
     SuperpoweredAdvancedAudioPlayer *player;
     SuperpoweredAndroidAudioIO *audioSystem;
     float *stereoBuffer;
+    bool audioWorking;
 };

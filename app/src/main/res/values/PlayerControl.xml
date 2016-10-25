@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="PLAY_LOCAL_SONG">0</integer>
+    <integer name="PLAY">1</integer>
+    <integer name="PAUSE">2</integer>
+    <integer name="SET_PROGRESS">3</integer>
+</resources>

@@ -1,5 +1,7 @@
 package me.sentimize.sentimize.Models;
 
+import android.support.annotation.NonNull;
+
 /**
  * Created by Eddy on 9/11/16.
  */
@@ -38,6 +40,11 @@ public class Song {
     @Override
     public String toString() {
         return name + " - " + artist; // this represents the song's id in our database
+    }
+
+    @Override
+    public boolean equals(Object o){
+        return o!=null && name!=null && artist!=null && o instanceof Song && ((Song)o).toString().equals(this.toString());
     }
 
     public int getDuration(){
