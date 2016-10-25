@@ -23,3 +23,5 @@ Next Steps:
 - Smoothly-animated seek-bar
 - Spotify Integration
 - More advanced local music analysis
+
+<iframe src="https://docs.google.com/document/d/1mEn01a33teceP42IE8Z2EYEMu-zLrcKgEfKIAbaYasM/pub?embedded=true"></iframe>
