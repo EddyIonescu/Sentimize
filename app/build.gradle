@@ -33,13 +33,13 @@ model {
         }
     }
     android { // main settings for your application
-        compileSdkVersion = 23
-        buildToolsVersion = "23.0.3"
+        compileSdkVersion = 25
+        buildToolsVersion = "25.0.1"
 
         defaultConfig {
             applicationId "me.sentimize.sentimize"
             minSdkVersion.apiLevel = 21 // more than 95% of all active Android devices
-            targetSdkVersion.apiLevel = 23
+            targetSdkVersion.apiLevel = 25
             versionCode 1
             versionName "1.0"
         }
@@ -84,10 +84,10 @@ model {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.4.0'
-    compile 'com.android.support:design:23.4.0'
-    compile 'com.android.support:support-v4:23.4.0'
-    compile 'com.android.support:recyclerview-v7:23.4.0'
+    compile 'com.android.support:appcompat-v7:25.0.1'
+    compile 'com.android.support:design:25.0.1'
+    compile 'com.android.support:support-v4:25.0.1'
+    compile 'com.android.support:recyclerview-v7:25.0.1'
     // easily view database and network calls (stetho is a debug bridge)
     compile 'com.facebook.stetho:stetho:1.4.1'
 }

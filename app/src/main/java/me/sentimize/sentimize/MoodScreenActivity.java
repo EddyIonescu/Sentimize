@@ -6,6 +6,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -139,12 +140,64 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
     private int uplifting = 1;
     private int energetic = 1;
     private int emotional = 1;
+    private AppBarLayout appBarLayout;
 
     public void initFabs(){
+
+        appBarLayout = (AppBarLayout) findViewById(R.id.app_bar);
 
         fab_uplifting = (FloatingActionButton) findViewById(R.id.fab_uplifting);
         fab_energetic = (FloatingActionButton) findViewById(R.id.fab_energy);
         fab_emotional = (FloatingActionButton) findViewById(R.id.fab_emotion);
+
+        View.OnFocusChangeListener upListen = new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                System.out.println("FOCUS CHANGED");
+                view.setAlpha((float)((uplifting / 2.5) + 0.2));
+            }
+        };
+        fab_uplifting.setOnFocusChangeListener(upListen);
+
+        // onfocuschange doesn't do anything
+        // invoked on toolbar collapse/expand
+        AppBarLayout.OnOffsetChangedListener collapseListen = new AppBarLayout.OnOffsetChangedListener() {
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                System.out.println("OFFSET CHANGED");
+                appBarLayout.requestFocus();
+
+                fab_uplifting.requestFocus();
+                fab_uplifting.setAlpha((float)((uplifting / 2.5) + 0.2));
+                fab_uplifting.refreshDrawableState();
+
+                fab_energetic.requestFocus();
+                fab_energetic.setAlpha((float)((energetic / 2.5) + 0.2));
+
+                fab_emotional.requestFocus();
+                fab_emotional.setAlpha((float)((emotional / 2.5) + 0.2));
+                //fab_emotional.performClick();
+
+                appBarLayout.refreshDrawableState();
+            }
+        };
+        appBarLayout.addOnOffsetChangedListener(collapseListen);
+
+        View.OnFocusChangeListener energyListen = new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                view.setAlpha((float)((energetic / 2.5) + 0.2));
+            }
+        };
+        fab_energetic.setOnFocusChangeListener(energyListen);
+
+        final View.OnFocusChangeListener emotionListen = new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                view.setAlpha((float)((emotional / 2.5) + 0.2));
+            }
+        };
+        fab_emotional.setOnFocusChangeListener(emotionListen);
 
         fab_lowtomed = AnimationUtils.loadAnimation(this, R.anim.fab_lowtomed);
         fab_medtolow = AnimationUtils.loadAnimation(this, R.anim.fab_medtolow);
@@ -158,6 +211,8 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
         fab_uplifting.setAlpha(0.6f);
         fab_energetic.setAlpha(0.6f);
         fab_emotional.setAlpha(0.6f);
+
+
 
         play_btn = (AppCompatImageButton) findViewById(R.id.play_btn);
         pause_btn = (AppCompatImageButton) findViewById(R.id.pause_btn);
@@ -247,7 +302,7 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
             }
             else if(v.getId() == R.id.fab_emotion){
                 emotional = changeFabSize(fab_emotional, emotional);
-                updateList();
+                //updateList();
                 SongFiltering.showSnackbarUpdate("emotion/passion analysis coming soon");
             }
             else if (v.getId() == R.id.play_btn) {
@@ -265,6 +320,7 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
             else {
                 System.out.println("Plus/close button was NOT tapped - " + this.getResources().getResourceName(v.getId()));
             }
+
             System.out.println("Uplifting: " + uplifting + " Energetic: " + energetic + " Emotional: " + emotional);
         }
         else{
