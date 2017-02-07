@@ -12,9 +12,9 @@ public class Song {
     private String storageStatus;
     private int duration;
 
-    public int uplifting = 0;
-    public int energetic = 0;
-    public int emotional = 0;
+    public Integer uplifting = 0;
+    public Integer energetic = 0;
+    public Integer emotional = 0;
 
     public Song(){
 

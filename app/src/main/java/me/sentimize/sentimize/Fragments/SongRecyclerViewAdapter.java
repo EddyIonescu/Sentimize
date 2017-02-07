@@ -40,6 +40,8 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerVi
         holder.mNameView.setText(mValues.get(position).name);
         holder.mArtistView.setText(mValues.get(position).artist);
         holder.mStorageStatusView.setText(mValues.get(position).getStorageStatus());
+        holder.mEnergyView.setText(mValues.get(position).energetic.toString());
+        holder.mHappinessView.setText(mValues.get(position).uplifting.toString());
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,6 +65,8 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerVi
         public final TextView mNameView;
         public final TextView mStorageStatusView;
         public final TextView mArtistView;
+        public final TextView mEnergyView;
+        public final TextView mHappinessView;
         public Song mItem;
 
         public ViewHolder(View view) {
@@ -71,6 +75,8 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerVi
             mNameView = (TextView) view.findViewById(R.id.name);
             mArtistView = (TextView) view.findViewById(R.id.artist);
             mStorageStatusView = (TextView) view.findViewById(R.id.storage_status);
+            mEnergyView = (TextView) view.findViewById(R.id.energy);
+            mHappinessView = (TextView) view.findViewById(R.id.happiness);
         }
 
         @Override

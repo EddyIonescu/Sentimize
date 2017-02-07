@@ -155,6 +155,10 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
         fab_energetic.setOnClickListener(this);
         fab_emotional.setOnClickListener(this);
 
+        fab_uplifting.setAlpha(0.6f);
+        fab_energetic.setAlpha(0.6f);
+        fab_emotional.setAlpha(0.6f);
+
         play_btn = (AppCompatImageButton) findViewById(R.id.play_btn);
         pause_btn = (AppCompatImageButton) findViewById(R.id.pause_btn);
         prev_btn = (AppCompatImageButton) findViewById(R.id.prev_btn);
@@ -192,28 +196,28 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
         this.setRequestedOrientation(orientation);
     }
 
+    // todo maybe bring animation back or in addition to opacity
+    // fixme actually find cause of that animation bug
     private boolean increasing = true;
     private int changeFabSize(final FloatingActionButton fab, int fromSize){
-        fab_uplifting.setEnabled(false);
-        fab_energetic.setEnabled(false);
-        fab_emotional.setEnabled(false);
         int toSize = 0;
         switch (fromSize){
             case 0:
-                fab.setAnimation(fab_lowtomed);
+                //fab.setAnimation(fab_lowtomed);
                 increasing = true;
                 toSize = 1;
                 break;
             case 1:
-                if(increasing) fab.setAnimation(fab_medtohigh); else fab.setAnimation(fab_medtolow);
+                //if(increasing) fab.setAnimation(fab_medtohigh); else fab.setAnimation(fab_medtolow);
                 toSize = increasing ? 2 : 0;
                 break;
             case 2:
-                fab.setAnimation(fab_hightomed);
+               // fab.setAnimation(fab_hightomed);
                 increasing = false;
                 toSize = 1;
         }
-        fab.animate();
+        fab.setAlpha((float)((toSize / 2.5) + 0.2));
+        //fab.animate();
         return toSize;
     }
 
@@ -226,9 +230,6 @@ public class MoodScreenActivity extends AppCompatActivity implements View.OnClic
     private void updateList(){
         SongContent.setItems(SongFiltering.filterLocalSongs(LocalMusicRequisitionUtil.getSongList(this),
                 uplifting, energetic, emotional, this));
-        fab_uplifting.setEnabled(true);
-        fab_energetic.setEnabled(true);
-        fab_emotional.setEnabled(true);
     }
 
     @Override

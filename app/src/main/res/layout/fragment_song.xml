@@ -17,7 +17,8 @@
         android:layout_width="wrap_content"
         android:paddingTop="@dimen/text_margin"
         android:paddingBottom="@dimen/text_margin"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -35,6 +36,35 @@
                 android:layout_gravity="center_horizontal"
                 android:gravity="bottom"/>
         </FrameLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+            <android.support.v7.widget.AppCompatImageView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:src="@drawable/power"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/energy"
+                android:textAppearance="?attr/textAppearanceListItem"
+                android:textSize="12sp" />
+            <android.support.v7.widget.AppCompatImageView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:tint="@android:color/black"
+                android:src="@drawable/ic_mood_black_24dp"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/happiness"
+                android:textAppearance="?attr/textAppearanceListItem"
+                android:textSize="12sp" />
+
+        </LinearLayout>
         <TextView
             android:id="@+id/artist"
             android:layout_width="wrap_content"
